@@ -6,16 +6,31 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/admin.css',
                 'resources/css/components.css',
                 'resources/css/booking.css',
+
                 'resources/js/app.js',
+                'resources/js/admin.js',
                 'resources/js/components.js',
                 'resources/js/booking.js',
             ],
             refresh: true,
         }),
     ],
-    server: { host: 'localhost', port: 5173, strictPort: false },
-    build:  { manifest: true, outDir: 'public/build' },
-    css:    { devSourcemap: true },
+
+    server: {
+        host: 'localhost',
+        port: 5173,
+        strictPort: false,
+    },
+
+    build: {
+        manifest: 'manifest.json',
+        outDir: 'public/build',
+    },
+
+    css: {
+        devSourcemap: true,
+    },
 });

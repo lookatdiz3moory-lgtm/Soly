@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Book an Appointment — Soly Clinic')
-@section('meta_description', 'Book your dental appointment at Soly Clinic in Nasr City, Cairo. Choose your service, doctor, date, and time online in under 2 minutes.')
+@section('meta_description', 'Book your dental appointment at Soly Clinic in Zahraa Maadi, Cairo. Choose your service, doctor, date, and time online in under 2 minutes.')
 
 @push('styles')
     @vite('resources/css/booking.css')
@@ -393,7 +393,7 @@
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                             <circle cx="12" cy="10" r="3"/>
                         </svg>
-                        <span>{{ config('clinic.address', 'Nasr City, Cairo, Egypt') }}</span>
+                        <span>{{ config('clinic.address', 'Zahraa Maadi, Cairo, Egypt') }}</span>
                     </div>
 
                     <div class="booking-info-row">
@@ -415,7 +415,7 @@
                         </svg>
                         <a href="tel:{{ config('clinic.phone','') }}"
                            style="color:var(--navy);font-weight:500">
-                            {{ config('clinic.phone', '+20 100 000 0000') }}
+                            {{ config('clinic.phone', '+20 100 582 6642') }}
                         </a>
                     </div>
                 </div>

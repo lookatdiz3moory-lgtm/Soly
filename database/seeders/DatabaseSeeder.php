@@ -202,8 +202,8 @@ class DoctorSeeder extends Seeder
             'name'          => 'Dr. Salim',
             'title'         => 'BDS, Military Medical Corps',
             'specialty'     => 'General & Cosmetic Dentistry',
-            'bio'           => 'Founder of Soly Clinic and trusted by hundreds of patients across Nasr City. Known for honest diagnoses, precision technique, and fair pricing. Proud graduate of military medical service. Dr. Salim believes every patient deserves world-class dental care without the world-class price tag.',
-            'phone'         => config('clinic.phone', '+20 100 000 0000'),
+            'bio'           => 'Founder of Soly Clinic and trusted by hundreds of patients across Zahraa Maadi. Known for honest diagnoses, precision technique, and fair pricing. Proud graduate of military medical service. Dr. Salim believes every patient deserves world-class dental care without the world-class price tag.',
+            'phone'         => config('clinic.phone', '+20 100 582 6642'),
             'experience'    => '10+ Years',
             'specialties'   => json_encode(['Implants', 'Hollywood Smile', 'Veneers', 'Cosmetics', 'Root Canal']),
             'schedule'      => json_encode($defaultSchedule),
@@ -295,11 +295,11 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             ['key' => 'clinic_name',        'value' => 'Soly Clinic',                       'group' => 'general',  'label' => 'Clinic Name',       'is_public' => true],
-            ['key' => 'clinic_tagline',      'value' => 'Premium Dental Care in Nasr City',  'group' => 'general',  'label' => 'Tagline',            'is_public' => true],
-            ['key' => 'clinic_phone',        'value' => '+20 100 000 0000',                  'group' => 'contact',  'label' => 'Phone Number',       'is_public' => true],
+            ['key' => 'clinic_tagline',      'value' => 'Premium Dental Care in Zahraa Maadi',  'group' => 'general',  'label' => 'Tagline',            'is_public' => true],
+            ['key' => 'clinic_phone',        'value' => '+20 100 582 6642',                  'group' => 'contact',  'label' => 'Phone Number',       'is_public' => true],
             ['key' => 'clinic_whatsapp',     'value' => '201000000000',                      'group' => 'contact',  'label' => 'WhatsApp Number',    'is_public' => true],
             ['key' => 'clinic_email',        'value' => 'info@solyclinic.com',               'group' => 'contact',  'label' => 'Email',              'is_public' => true],
-            ['key' => 'clinic_address',      'value' => 'Nasr City, Cairo, Egypt',           'group' => 'contact',  'label' => 'Address',            'is_public' => true],
+            ['key' => 'clinic_address',      'value' => 'Zahraa Maadi, Cairo, Egypt',           'group' => 'contact',  'label' => 'Address',            'is_public' => true],
             ['key' => 'booking_confirmation','value' => 'auto',                              'group' => 'booking',  'label' => 'Confirmation Mode',  'is_public' => false],
         ];
 

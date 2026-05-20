@@ -28,10 +28,10 @@ index 5d222a1..4a936e5 100644
  use Illuminate\Support\Facades\Auth;
 +use Illuminate\Support\Facades\Gate;
  use Illuminate\View\View;
- 
+
  /**
 @@ -31,6 +32,8 @@ class AppointmentManagementController extends Controller
- 
+
      public function index(Request $request): View
      {
 +        Gate::authorize('viewAny', Appointment::class);
@@ -42,14 +42,14 @@ index 5d222a1..4a936e5 100644
 @@ -79,6 +82,8 @@ public function show(int $id): View
              'user:id,name,email',
          ])->findOrFail($id);
- 
+
 +        Gate::authorize('view', $appointment);
 +
          return view('admin.appointments.show', [
              'appointment' => $appointment,
              'statuses'    => Appointment::VALID_STATUSES,
 @@ -90,6 +95,8 @@ public function show(int $id): View
- 
+
      public function create(): View
      {
 +        Gate::authorize('create', Appointment::class);
@@ -58,7 +58,7 @@ index 5d222a1..4a936e5 100644
              'services' => Service::bookable()->get(['id', 'name']),
              'doctors'  => Doctor::active()->get(['id', 'name', 'slot_duration']),
 @@ -99,6 +106,8 @@ public function create(): View
- 
+
      public function store(Request $request): RedirectResponse
      {
 +        Gate::authorize('create', Appointment::class);
@@ -68,32 +68,32 @@ index 5d222a1..4a936e5 100644
              'patient_phone'    => ['required', 'string', 'max:25'],
 @@ -136,6 +145,7 @@ public function updateStatus(Request $request, int $id): JsonResponse
          ]);
- 
+
          $appointment = Appointment::findOrFail($id);
 +        Gate::authorize('update', $appointment);
          $newStatus   = $data['status'];
- 
+
          $updates = ['status' => $newStatus];
 @@ -173,7 +183,9 @@ public function updateNotes(Request $request, int $id): JsonResponse
              'admin_notes' => ['nullable', 'string', 'max:2000'],
          ]);
- 
+
 -        Appointment::findOrFail($id)->update($data);
 +        $appointment = Appointment::findOrFail($id);
 +        Gate::authorize('update', $appointment);
 +        $appointment->update($data);
- 
+
          return response()->json(['success' => true]);
      }
 @@ -203,6 +215,8 @@ public function openWhatsApp(Request $request, int $id): JsonResponse
- 
+
      public function calendar(Request $request): View
      {
 +        Gate::authorize('viewAny', Appointment::class);
 +
          $month = $request->input('month', today()->format('Y-m'));
          [$year, $mon] = explode('-', $month . '-01');
- 
+
 diff --git a/app/Http/Controllers/Admin/DashboardController.php b/app/Http/Controllers/Admin/DashboardController.php
 index b2f9989..414a448 100644
 --- a/app/Http/Controllers/Admin/DashboardController.php
@@ -104,17 +104,17 @@ index b2f9989..414a448 100644
  use Illuminate\Http\Request;
 -use Illuminate\Support\Facades\DB;
  use Illuminate\View\View;
- 
+
  /**
 @@ -46,14 +45,16 @@ public function stats(): JsonResponse
- 
+
      private function buildStats(): array
      {
 -        $today = today()->toDateString();
 -        $month = today()->format('Y-m');
 +        $year  = today()->year;
 +        $month = today()->month;
- 
+
          return [
              // Volume
              'total_appointments' => Appointment::count(),
@@ -123,7 +123,7 @@ index b2f9989..414a448 100644
 +            'month_count'        => Appointment::whereYear('appointment_date', $year)
 +                                               ->whereMonth('appointment_date', $month)
 +                                               ->count(),
- 
+
              // Status breakdown
              'pending'    => Appointment::pending()->count(),
 @@ -70,7 +71,8 @@ private function buildStats(): array
@@ -134,7 +134,7 @@ index b2f9989..414a448 100644
 +                ->whereYear('created_at', $year)
 +                ->whereMonth('created_at', $month)
                  ->count(),
- 
+
              // Revenue (completed appointments with price_paid set)
 @@ -79,7 +81,8 @@ private function buildStats(): array
                  ->sum('price_paid'),
@@ -144,10 +144,10 @@ index b2f9989..414a448 100644
 +                ->whereYear('appointment_date', $year)
 +                ->whereMonth('appointment_date', $month)
                  ->sum('price_paid'),
- 
+
              // Clinic
 @@ -110,16 +113,13 @@ private function recentActivity(): \Illuminate\Support\Collection
- 
+
      private function weeklyBookings(): array
      {
 -        // Last 7 days, grouped by date
@@ -167,7 +167,7 @@ index b2f9989..414a448 100644
 +            ->get(['created_at'])
 +            ->groupBy(fn ($a) => $a->created_at->toDateString())
 +            ->map(fn ($group) => $group->count());
- 
+
          // Build a full 7-day array, filling gaps with 0
          $result = [];
 @@ -128,18 +128,10 @@ private function weeklyBookings(): array
@@ -178,7 +178,7 @@ index b2f9989..414a448 100644
 +                'count' => $counts->get($date, 0),
              ];
          }
- 
+
 -        foreach ($rows as $row) {
 -            foreach ($result as &$slot) {
 -                if ($slot['date'] === $row->day) {
@@ -196,7 +196,7 @@ index d7c0f8b..68b486d 100644
 +++ b/app/Http/Controllers/Admin/DoctorManagementController.php
 @@ -3,9 +3,121 @@
  namespace App\Http\Controllers\Admin;
- 
+
  use App\Http\Controllers\Controller;
 +use App\Models\Doctor;
 +use App\Models\Service;
@@ -204,7 +204,7 @@ index d7c0f8b..68b486d 100644
  use Illuminate\Http\Request;
 +use Illuminate\Support\Facades\Gate;
 +use Illuminate\View\View;
- 
+
  class DoctorManagementController extends Controller
  {
 -    //
@@ -879,7 +879,7 @@ index e6fb9ec..2a174a1 100644
 @@ -43,52 +43,63 @@ public function store(StoreAppointmentRequest $request): JsonResponse
          // Compute slot_end from doctor's slot_duration
          $slotEnd = date('H:i', strtotime($data['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
- 
+
 -        // Final slot availability check — race condition guard
 -        $occupied = Appointment::forDoctor($doctor->id)
 -            ->forDate($data['appointment_date'])
@@ -891,7 +891,7 @@ index e6fb9ec..2a174a1 100644
 +        // a failed user upsert must never roll back the appointment, and
 +        // a failed appointment must never roll back the user record).
 +        $patientUser = $this->resolvePatient($data);
- 
+
 -        if ($occupied) {
 +        // Re-check slot availability AND create the appointment atomically.
 +        // Using lockForUpdate() inside the transaction prevents two
@@ -944,7 +944,7 @@ index e6fb9ec..2a174a1 100644
                  ['slot_start' => ['This slot is no longer available.']]
              );
          }
- 
+
 -        // Find or create a patient User record
 -        $patientUser = $this->resolvePatient($data);
 -
@@ -1214,7 +1214,7 @@ index 0000000..5a146cc
 +            ? view('pages.contact')
 +            : view('pages.placeholder', [
 +                'pageTitle'   => 'Contact Us',
-+                'pageMessage' => 'Reach us at ' . config('clinic.phone', '+20 100 000 0000')
++                'pageMessage' => 'Reach us at ' . config('clinic.phone', '+20 100 582 6642')
 +                              . ' or ' . config('clinic.email', 'info@solyclinic.com') . '.',
 +            ]);
 +    }
@@ -1247,13 +1247,13 @@ index 4e71c8a..b1a6ffd 100644
 --- a/app/Http/Controllers/DoctorController.php
 +++ b/app/Http/Controllers/DoctorController.php
 @@ -2,9 +2,36 @@
- 
+
  namespace App\Http\Controllers;
- 
+
 -use Illuminate\Http\Request;
 +use App\Models\Doctor;
 +use Illuminate\View\View;
- 
+
  class DoctorController extends Controller
  {
 -    //
@@ -1396,13 +1396,13 @@ index 0430a88..acd00f8 100644
 --- a/app/Http/Controllers/ServiceController.php
 +++ b/app/Http/Controllers/ServiceController.php
 @@ -2,9 +2,34 @@
- 
+
  namespace App\Http\Controllers;
- 
+
 -use Illuminate\Http\Request;
 +use App\Models\Service;
 +use Illuminate\View\View;
- 
+
  class ServiceController extends Controller
  {
 -    //
@@ -1546,13 +1546,13 @@ index d31ab4f..29e0908 100644
              return redirect()->route('admin.login')
                  ->with('error', 'Please sign in to access the admin panel.');
          }
- 
+
 -        // Check admin role — adapt field name to your User model
 -        if (!in_array($request->user()->role ?? '', ['superadmin', 'admin', 'secretary', 'doctor'])) {
 +        if (!$user->isStaff() || !$user->is_active) {
              abort(403, 'Access denied. Admin privileges required.');
          }
- 
+
 diff --git a/app/Models/Models.php b/app/Models/Models.php
 deleted file mode 100644
 index e5f6f9c..0000000
@@ -2146,9 +2146,9 @@ index 452e6b6..ea6dc71 100644
 --- a/app/Providers/AppServiceProvider.php
 +++ b/app/Providers/AppServiceProvider.php
 @@ -2,6 +2,22 @@
- 
+
  namespace App\Providers;
- 
+
 +use App\Models\Appointment;
 +use App\Models\Doctor;
 +use App\Models\Faq;
@@ -2166,7 +2166,7 @@ index 452e6b6..ea6dc71 100644
 +use App\Policies\TestimonialPolicy;
 +use Illuminate\Support\Facades\Gate;
  use Illuminate\Support\ServiceProvider;
- 
+
  class AppServiceProvider extends ServiceProvider
 @@ -19,6 +35,35 @@ public function register(): void
       */

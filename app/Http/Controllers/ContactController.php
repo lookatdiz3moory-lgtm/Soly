@@ -16,7 +16,7 @@ class ContactController extends Controller
             ? view('pages.contact')
             : view('pages.placeholder', [
                 'pageTitle'   => 'Contact Us',
-                'pageMessage' => 'Reach us at ' . config('clinic.phone', '+20 100 000 0000')
+                'pageMessage' => 'Reach us at ' . config('clinic.phone', '+20 100 582 6642')
                               . ' or ' . config('clinic.email', 'info@solyclinic.com') . '.',
             ]);
     }

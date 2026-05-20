@@ -32,7 +32,7 @@
       </h1>
 
       <p class="hero__subtext" data-animate="fade-up" data-delay="160">
-        Premium dental care in Nasr City, Cairo. Honest diagnoses, transparent pricing,
+        Premium dental care in Zahraa Maadi, Cairo. Honest diagnoses, transparent pricing,
         and results that transform your confidence — because you deserve a dentist who
         truly cares.
       </p>

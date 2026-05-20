@@ -6,9 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- SEO Meta --}}
-    <title>@yield('title', 'Soly Clinic — Premier Dental Care in Nasr City')</title>
-    <meta name="description" content="@yield('meta_description', 'Soly Clinic offers premium dental care in Nasr City, Cairo. Implants, veneers, Hollywood smile, whitening and more. Book your appointment today.')">
-    <meta name="keywords" content="@yield('meta_keywords', 'dental clinic nasr city, dentist cairo, implants, veneers, hollywood smile, teeth whitening')">
+    <title>@yield('title', 'Soly Clinic — Premier Dental Care in Zahraa Maadi')</title>
+    <meta name="description" content="@yield('meta_description', 'Soly Clinic offers premium dental care in Zahraa Maadi, Cairo. Implants, veneers, Hollywood smile, whitening and more. Book your appointment today.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'dental clinic Zahraa Maadi, dentist cairo, implants, veneers, hollywood smile, teeth whitening')">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
 
@@ -16,21 +16,21 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('og_title', 'Soly Clinic — Premier Dental Care')">
-    <meta property="og:description" content="@yield('og_description', 'Premium dental care in Nasr City, Cairo.')">
+    <meta property="og:description" content="@yield('og_description', 'Premium dental care in Zahraa Maadi, Cairo.')">
     <meta property="og:image" content="@yield('og_image', asset('images/og-cover.jpg'))">
     <meta name="twitter:card" content="summary_large_image">
 
     {{-- Schema.org Local Business --}}
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@type": "Dentist",
         "name": "Soly Clinic",
         "url": "{{ config('app.url') }}",
-        "telephone": "{{ config('clinic.phone', '+20 100 000 0000') }}",
+        "telephone": "{{ config('clinic.phone', '+20 100 582 6642') }}",
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Nasr City",
+            "streetAddress": "Zahraa Maadi",
             "addressLocality": "Cairo",
             "addressCountry": "EG"
         },

@@ -24,7 +24,7 @@
                     </div>
                 </a>
                 <p class="footer__brand-desc">
-                    Expert dental care in Nasr City, Cairo. Honest treatment, fair pricing, and results that last — because your smile deserves the best.
+                    Expert dental care in Zahraa Maadi, Cairo. Honest treatment, fair pricing, and results that last — because your smile deserves the best.
                 </p>
                 <div class="footer__social">
                     @if(config('clinic.instagram'))
@@ -99,14 +99,14 @@
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                             <circle cx="12" cy="10" r="3"/>
                         </svg>
-                        <span>{{ config('clinic.address', 'Nasr City, Cairo, Egypt') }}</span>
+                        <span>{{ config('clinic.address', 'Zahraa Maadi, Cairo, Egypt') }}</span>
                     </li>
                     <li class="footer__contact-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-7-7A2 2 0 011.1 3.85h3A2 2 0 016 5.57c.24.96.58 1.89 1 2.77a2 2 0 01-.45 2.11L5.91 11.1a16 16 0 006 6l.66-.66a2 2 0 012.11-.45c.88.42 1.81.76 2.77 1A2 2 0 0119 19h3"/>
                         </svg>
-                        <a href="tel:{{ config('clinic.phone', '+20 100 000 0000') }}" class="footer__link">
-                            {{ config('clinic.phone', '+20 100 000 0000') }}
+                        <a href="tel:{{ config('clinic.phone', '+20 100 582 6642') }}" class="footer__link">
+                            {{ config('clinic.phone', '+20 100 582 6642') }}
                         </a>
                     </li>
                     <li class="footer__contact-item">

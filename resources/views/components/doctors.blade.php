@@ -11,7 +11,7 @@
     'name'       => 'Dr. Salim',
     'title'      => 'BDS, Military Medical Corps',
     'specialty'  => 'General & Cosmetic Dentistry',
-    'bio'        => 'Founder of Soly Clinic, trusted by hundreds of patients across Nasr City. Known for honest diagnoses, precision technique, and fair pricing. Proud graduate of military medical service.',
+    'bio'        => 'Founder of Soly Clinic, trusted by hundreds of patients across Zahraa Maadi. Known for honest diagnoses, precision technique, and fair pricing. Proud graduate of military medical service.',
     'photo'      => null,
     'experience' => '10+ Years',
     'specialties'=> ['Implants','Hollywood Smile','Veneers','Root Canal'],

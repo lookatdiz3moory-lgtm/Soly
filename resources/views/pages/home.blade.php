@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Soly Clinic — Premier Dental Care in Nasr City, Cairo')
-@section('meta_description', 'Soly Clinic offers premium dental care in Nasr City, Cairo. Implants, veneers, Hollywood smile, whitening, and more. Honest treatment, transparent pricing. Book today.')
+@section('title', 'Soly Clinic — Premier Dental Care in Zahraa Maadi, Cairo')
+@section('meta_description', 'Soly Clinic offers premium dental care in Zahraa Maadi, Cairo. Implants, veneers, Hollywood smile, whitening, and more. Honest treatment, transparent pricing. Book today.')
 
 @section('content')
 
@@ -36,7 +36,7 @@
         ['icon'=>'🏆', 'title'=>'Expert Clinical Skills',  'desc'=>'Precision-trained with years of experience across all dental specialties. Military discipline, civilian warmth.'],
         ['icon'=>'😌', 'title'=>'Truly Pain-Free',         'desc'=>'Modern anaesthesia, patient pacing, and genuine empathy. If dentistry has scared you before — we will change that.'],
         ['icon'=>'👨‍👩‍👧','title'=>'Built for Families',   'desc'=>'From toddlers to grandparents, we treat every age with equal care and patience. Bring the whole family.'],
-        ['icon'=>'📍', 'title'=>'Your Neighbourhood Clinic','desc'=>'Right here in Nasr City. Your neighbour, your community, your trusted dentist who knows you by name.'],
+        ['icon'=>'📍', 'title'=>'Your Neighbourhood Clinic','desc'=>'Right here in Zahraa Maadi. Your neighbour, your community, your trusted dentist who knows you by name.'],
       ] as $i => $item)
       <div class="why-card" data-animate="fade-up" data-delay="{{ $i * 75 }}">
         <div class="why-card__icon" aria-hidden="true">{{ $item['icon'] }}</div>
@@ -192,7 +192,7 @@
     <div class="section-header" data-animate="fade-up">
       <div class="section-tag">Find Us</div>
       <h2 class="section-title" id="location-heading">
-        We're in Nasr City, Cairo
+        We're in Zahraa Maadi, Cairo
       </h2>
     </div>
 
@@ -202,8 +202,8 @@
 
       <div style="display:flex;flex-direction:column;gap:var(--sp-6)">
         @foreach([
-          ['svg'=>'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>','label'=>'Address',  'value'=>config('clinic.address','Nasr City, Cairo, Egypt'),'href'=>null],
-          ['svg'=>'<path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-7-7 2 2 0 011.85-2.12h3"/>','label'=>'Phone','value'=>config('clinic.phone','+20 100 000 0000'),'href'=>'tel:'.config('clinic.phone','')],
+          ['svg'=>'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>','label'=>'Address',  'value'=>config('clinic.address','Zahraa Maadi, Cairo, Egypt'),'href'=>null],
+          ['svg'=>'<path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-7-7 2 2 0 011.85-2.12h3"/>','label'=>'Phone','value'=>config('clinic.phone','+20 100 582 6642'),'href'=>'tel:'.config('clinic.phone','')],
           ['svg'=>'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>','label'=>'Hours','value'=>"Sun–Thu: 9 AM – 9 PM\nSat: 10 AM – 6 PM",'href'=>null],
         ] as $det)
         <div style="display:flex;gap:var(--sp-4);align-items:flex-start">
