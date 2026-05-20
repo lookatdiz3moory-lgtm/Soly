@@ -1,0 +1,2390 @@
+diff --git a/app/Exceptions/SlotUnavailableException.php b/app/Exceptions/SlotUnavailableException.php
+new file mode 100644
+index 0000000..f2d301f
+--- /dev/null
++++ b/app/Exceptions/SlotUnavailableException.php
+@@ -0,0 +1,14 @@
++<?php
++
++namespace App\Exceptions;
++
++use RuntimeException;
++
++/**
++ * Thrown inside the booking transaction when a slot is found to be
++ * occupied after acquiring the row-level lock. Caught by the API
++ * controller and converted to a 422 JSON response.
++ */
++class SlotUnavailableException extends RuntimeException
++{
++}
+diff --git a/app/Http/Controllers/Admin/AppointmentManagementController.php b/app/Http/Controllers/Admin/AppointmentManagementController.php
+index 5d222a1..4a936e5 100644
+--- a/app/Http/Controllers/Admin/AppointmentManagementController.php
++++ b/app/Http/Controllers/Admin/AppointmentManagementController.php
+@@ -10,6 +10,7 @@
+ use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Auth;
++use Illuminate\Support\Facades\Gate;
+ use Illuminate\View\View;
+ 
+ /**
+@@ -31,6 +32,8 @@ class AppointmentManagementController extends Controller
+ 
+     public function index(Request $request): View
+     {
++        Gate::authorize('viewAny', Appointment::class);
++
+         $query = Appointment::with(['doctor:id,name', 'service:id,name'])
+             ->orderByDesc('appointment_date')
+             ->orderByDesc('slot_start');
+@@ -79,6 +82,8 @@ public function show(int $id): View
+             'user:id,name,email',
+         ])->findOrFail($id);
+ 
++        Gate::authorize('view', $appointment);
++
+         return view('admin.appointments.show', [
+             'appointment' => $appointment,
+             'statuses'    => Appointment::VALID_STATUSES,
+@@ -90,6 +95,8 @@ public function show(int $id): View
+ 
+     public function create(): View
+     {
++        Gate::authorize('create', Appointment::class);
++
+         return view('admin.appointments.create', [
+             'services' => Service::bookable()->get(['id', 'name']),
+             'doctors'  => Doctor::active()->get(['id', 'name', 'slot_duration']),
+@@ -99,6 +106,8 @@ public function create(): View
+ 
+     public function store(Request $request): RedirectResponse
+     {
++        Gate::authorize('create', Appointment::class);
++
+         $data = $request->validate([
+             'patient_name'     => ['required', 'string', 'max:100'],
+             'patient_phone'    => ['required', 'string', 'max:25'],
+@@ -136,6 +145,7 @@ public function updateStatus(Request $request, int $id): JsonResponse
+         ]);
+ 
+         $appointment = Appointment::findOrFail($id);
++        Gate::authorize('update', $appointment);
+         $newStatus   = $data['status'];
+ 
+         $updates = ['status' => $newStatus];
+@@ -173,7 +183,9 @@ public function updateNotes(Request $request, int $id): JsonResponse
+             'admin_notes' => ['nullable', 'string', 'max:2000'],
+         ]);
+ 
+-        Appointment::findOrFail($id)->update($data);
++        $appointment = Appointment::findOrFail($id);
++        Gate::authorize('update', $appointment);
++        $appointment->update($data);
+ 
+         return response()->json(['success' => true]);
+     }
+@@ -203,6 +215,8 @@ public function openWhatsApp(Request $request, int $id): JsonResponse
+ 
+     public function calendar(Request $request): View
+     {
++        Gate::authorize('viewAny', Appointment::class);
++
+         $month = $request->input('month', today()->format('Y-m'));
+         [$year, $mon] = explode('-', $month . '-01');
+ 
+diff --git a/app/Http/Controllers/Admin/DashboardController.php b/app/Http/Controllers/Admin/DashboardController.php
+index b2f9989..414a448 100644
+--- a/app/Http/Controllers/Admin/DashboardController.php
++++ b/app/Http/Controllers/Admin/DashboardController.php
+@@ -10,7 +10,6 @@
+ use App\Models\User;
+ use Illuminate\Http\JsonResponse;
+ use Illuminate\Http\Request;
+-use Illuminate\Support\Facades\DB;
+ use Illuminate\View\View;
+ 
+ /**
+@@ -46,14 +45,16 @@ public function stats(): JsonResponse
+ 
+     private function buildStats(): array
+     {
+-        $today = today()->toDateString();
+-        $month = today()->format('Y-m');
++        $year  = today()->year;
++        $month = today()->month;
+ 
+         return [
+             // Volume
+             'total_appointments' => Appointment::count(),
+             'today_count'        => Appointment::today()->count(),
+-            'month_count'        => Appointment::whereRaw("DATE_FORMAT(appointment_date,'%Y-%m') = ?", [$month])->count(),
++            'month_count'        => Appointment::whereYear('appointment_date', $year)
++                                               ->whereMonth('appointment_date', $month)
++                                               ->count(),
+ 
+             // Status breakdown
+             'pending'    => Appointment::pending()->count(),
+@@ -70,7 +71,8 @@ private function buildStats(): array
+             // Patients
+             'total_patients' => User::patients()->count(),
+             'new_patients_month' => User::patients()
+-                ->whereRaw("DATE_FORMAT(created_at,'%Y-%m') = ?", [$month])
++                ->whereYear('created_at', $year)
++                ->whereMonth('created_at', $month)
+                 ->count(),
+ 
+             // Revenue (completed appointments with price_paid set)
+@@ -79,7 +81,8 @@ private function buildStats(): array
+                 ->sum('price_paid'),
+             'revenue_month' => (float) Appointment::completed()
+                 ->whereNotNull('price_paid')
+-                ->whereRaw("DATE_FORMAT(appointment_date,'%Y-%m') = ?", [$month])
++                ->whereYear('appointment_date', $year)
++                ->whereMonth('appointment_date', $month)
+                 ->sum('price_paid'),
+ 
+             // Clinic
+@@ -110,16 +113,13 @@ private function recentActivity(): \Illuminate\Support\Collection
+ 
+     private function weeklyBookings(): array
+     {
+-        // Last 7 days, grouped by date
+-        $rows = DB::select("
+-            SELECT
+-                DATE(created_at) as day,
+-                COUNT(*) as count
+-            FROM appointments
+-            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+-            GROUP BY DATE(created_at)
+-            ORDER BY day ASC
+-        ");
++        // Fetch created_at for the past 7 days and group by date in PHP —
++        // avoids any database-specific date functions entirely.
++        $counts = Appointment::query()
++            ->where('created_at', '>=', today()->subDays(6)->toDateString())
++            ->get(['created_at'])
++            ->groupBy(fn ($a) => $a->created_at->toDateString())
++            ->map(fn ($group) => $group->count());
+ 
+         // Build a full 7-day array, filling gaps with 0
+         $result = [];
+@@ -128,18 +128,10 @@ private function weeklyBookings(): array
+             $result[] = [
+                 'date'  => $date,
+                 'label' => today()->subDays($i)->format('D'),
+-                'count' => 0,
++                'count' => $counts->get($date, 0),
+             ];
+         }
+ 
+-        foreach ($rows as $row) {
+-            foreach ($result as &$slot) {
+-                if ($slot['date'] === $row->day) {
+-                    $slot['count'] = (int) $row->count;
+-                }
+-            }
+-        }
+-
+         return $result;
+     }
+ }
+diff --git a/app/Http/Controllers/Admin/DoctorManagementController.php b/app/Http/Controllers/Admin/DoctorManagementController.php
+index d7c0f8b..68b486d 100644
+--- a/app/Http/Controllers/Admin/DoctorManagementController.php
++++ b/app/Http/Controllers/Admin/DoctorManagementController.php
+@@ -3,9 +3,121 @@
+ namespace App\Http\Controllers\Admin;
+ 
+ use App\Http\Controllers\Controller;
++use App\Models\Doctor;
++use App\Models\Service;
++use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
+ 
+ class DoctorManagementController extends Controller
+ {
+-    //
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Doctor::class);
++        $doctors = Doctor::orderBy('sort_order')->orderBy('name')->get();
++        return $this->render('admin.doctors.index', 'Doctors', compact('doctors'), $doctors->count() . ' doctors');
++    }
++
++    public function create(): View
++    {
++        Gate::authorize('create', Doctor::class);
++        return $this->render('admin.doctors.create', 'Add Doctor', [
++            'services' => Service::active()->get(['id', 'name']),
++        ]);
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Doctor::class);
++        $doctor = Doctor::create($this->validateDoctor($request));
++        if ($request->filled('services')) {
++            $doctor->services()->sync((array) $request->input('services'));
++        }
++        return redirect()->route('admin.doctors.index')
++            ->with('success', "Doctor {$doctor->name} created.");
++    }
++
++    public function edit(int $id): View
++    {
++        $doctor = Doctor::findOrFail($id);
++        Gate::authorize('update', $doctor);
++        return $this->render('admin.doctors.edit', 'Edit Doctor', [
++            'doctor'   => $doctor,
++            'services' => Service::active()->get(['id', 'name']),
++        ]);
++    }
++
++    public function update(Request $request, int $id): RedirectResponse
++    {
++        $doctor = Doctor::findOrFail($id);
++        Gate::authorize('update', $doctor);
++        $doctor->update($this->validateDoctor($request));
++        if ($request->has('services')) {
++            $doctor->services()->sync((array) $request->input('services'));
++        }
++        return redirect()->route('admin.doctors.index')
++            ->with('success', "Doctor {$doctor->name} updated.");
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $doctor = Doctor::findOrFail($id);
++        Gate::authorize('delete', $doctor);
++        $doctor->delete();
++        return redirect()->route('admin.doctors.index')
++            ->with('success', 'Doctor removed.');
++    }
++
++    public function schedule(int $id): View
++    {
++        $doctor = Doctor::findOrFail($id);
++        Gate::authorize('update', $doctor);
++        return $this->render('admin.doctors.schedule', 'Doctor Schedule', compact('doctor'));
++    }
++
++    public function updateSchedule(Request $request, int $id): RedirectResponse
++    {
++        $doctor = Doctor::findOrFail($id);
++        Gate::authorize('update', $doctor);
++
++        $schedule = $request->input('schedule', []);
++        if (is_string($schedule)) {
++            $decoded = json_decode($schedule, true);
++            $schedule = is_array($decoded) ? $decoded : [];
++        }
++
++        $doctor->update(['schedule' => $schedule]);
++
++        return redirect()->route('admin.doctors.schedule', $doctor->id)
++            ->with('success', 'Schedule updated.');
++    }
++
++    /* ── Helpers ────────────────────────────────────────────── */
++
++    private function validateDoctor(Request $request): array
++    {
++        return $request->validate([
++            'name'           => ['required', 'string', 'max:120'],
++            'title'          => ['nullable', 'string', 'max:80'],
++            'specialty'      => ['nullable', 'string', 'max:120'],
++            'bio'            => ['nullable', 'string', 'max:5000'],
++            'phone'          => ['nullable', 'string', 'max:25'],
++            'email'          => ['nullable', 'email', 'max:150'],
++            'experience'     => ['nullable', 'string', 'max:80'],
++            'slot_duration'  => ['nullable', 'integer', 'min:5', 'max:240'],
++            'is_active'      => ['nullable', 'boolean'],
++            'sort_order'     => ['nullable', 'integer', 'min:0'],
++        ]);
++    }
++
++    private function render(string $view, string $title, array $data = [], ?string $records = null): View
++    {
++        return view()->exists($view)
++            ? view($view, $data)
++            : view('admin.placeholder', array_merge([
++                'pageTitle' => $title,
++                'records'   => $records,
++            ], $data));
++    }
+ }
+diff --git a/app/Http/Controllers/Admin/FaqManagementController.php b/app/Http/Controllers/Admin/FaqManagementController.php
+new file mode 100644
+index 0000000..d7cbde6
+--- /dev/null
++++ b/app/Http/Controllers/Admin/FaqManagementController.php
+@@ -0,0 +1,64 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use App\Models\Faq;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
++
++class FaqManagementController extends Controller
++{
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Faq::class);
++        $faqs = Faq::orderBy('category')->orderBy('sort_order')->orderBy('id')->get();
++
++        return view()->exists('admin.faqs.index')
++            ? view('admin.faqs.index', compact('faqs'))
++            : view('admin.placeholder', [
++                'pageTitle' => 'FAQs',
++                'records'   => $faqs->count() . ' FAQs',
++                'faqs'      => $faqs,
++            ]);
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Faq::class);
++        Faq::create($this->validateFaq($request));
++        return redirect()->route('admin.faqs.index')->with('success', 'FAQ added.');
++    }
++
++    public function update(Request $request, int $id): RedirectResponse
++    {
++        $faq = Faq::findOrFail($id);
++        Gate::authorize('update', $faq);
++        $faq->update($this->validateFaq($request));
++        return redirect()->route('admin.faqs.index')->with('success', 'FAQ updated.');
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $faq = Faq::findOrFail($id);
++        Gate::authorize('delete', $faq);
++        $faq->delete();
++        return redirect()->route('admin.faqs.index')->with('success', 'FAQ removed.');
++    }
++
++    private function validateFaq(Request $request): array
++    {
++        return $request->validate([
++            'category'    => ['nullable', 'string', 'max:80'],
++            'question'    => ['required', 'string', 'max:500'],
++            'question_ar' => ['nullable', 'string', 'max:500'],
++            'answer'      => ['required', 'string', 'max:5000'],
++            'answer_ar'   => ['nullable', 'string', 'max:5000'],
++            'is_featured' => ['nullable', 'boolean'],
++            'is_active'   => ['nullable', 'boolean'],
++            'sort_order'  => ['nullable', 'integer', 'min:0'],
++        ]);
++    }
++}
+diff --git a/app/Http/Controllers/Admin/GalleryManagementController.php b/app/Http/Controllers/Admin/GalleryManagementController.php
+new file mode 100644
+index 0000000..75c866b
+--- /dev/null
++++ b/app/Http/Controllers/Admin/GalleryManagementController.php
+@@ -0,0 +1,84 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use App\Models\Gallery;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
++
++class GalleryManagementController extends Controller
++{
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Gallery::class);
++        $items = Gallery::with('service:id,name')
++            ->orderByDesc('is_featured')
++            ->orderBy('sort_order')
++            ->orderByDesc('id')
++            ->get();
++
++        return view()->exists('admin.gallery.index')
++            ? view('admin.gallery.index', compact('items'))
++            : view('admin.placeholder', [
++                'pageTitle' => 'Gallery',
++                'records'   => $items->count() . ' items',
++                'items'     => $items,
++            ]);
++    }
++
++    public function upload(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Gallery::class);
++
++        $data = $request->validate([
++            'service_id'   => ['nullable', 'integer', 'exists:services,id'],
++            'type'         => ['required', 'in:before_after,general,clinic,team'],
++            'title'        => ['nullable', 'string', 'max:200'],
++            'description'  => ['nullable', 'string', 'max:2000'],
++            'treatment'    => ['nullable', 'string', 'max:120'],
++            'image'        => ['nullable', 'image', 'max:5120'],
++            'before_image' => ['nullable', 'image', 'max:5120'],
++            'after_image'  => ['nullable', 'image', 'max:5120'],
++            'is_featured'  => ['nullable', 'boolean'],
++            'is_active'    => ['nullable', 'boolean'],
++        ]);
++
++        foreach (['image', 'before_image', 'after_image'] as $field) {
++            if ($request->hasFile($field)) {
++                $data[$field] = $request->file($field)->store('gallery', 'public');
++            }
++        }
++
++        Gallery::create($data);
++
++        return redirect()->route('admin.gallery.index')
++            ->with('success', 'Gallery item uploaded.');
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $item = Gallery::findOrFail($id);
++        Gate::authorize('delete', $item);
++        $item->delete();
++
++        return redirect()->route('admin.gallery.index')
++            ->with('success', 'Gallery item removed.');
++    }
++
++    public function toggle(int $id): JsonResponse
++    {
++        $item = Gallery::findOrFail($id);
++        Gate::authorize('update', $item);
++
++        $item->update(['is_active' => !$item->is_active]);
++
++        return response()->json([
++            'success'   => true,
++            'is_active' => $item->is_active,
++        ]);
++    }
++}
+diff --git a/app/Http/Controllers/Admin/OfferManagementController.php b/app/Http/Controllers/Admin/OfferManagementController.php
+new file mode 100644
+index 0000000..270b7d6
+--- /dev/null
++++ b/app/Http/Controllers/Admin/OfferManagementController.php
+@@ -0,0 +1,94 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use App\Models\Offer;
++use App\Models\Service;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
++
++class OfferManagementController extends Controller
++{
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Offer::class);
++        $offers = Offer::with('service:id,name')->orderBy('sort_order')->orderByDesc('id')->get();
++        return $this->render('admin.offers.index', 'Offers', compact('offers'), $offers->count() . ' offers');
++    }
++
++    public function create(): View
++    {
++        Gate::authorize('create', Offer::class);
++        return $this->render('admin.offers.create', 'Add Offer', [
++            'services' => Service::active()->get(['id', 'name']),
++        ]);
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Offer::class);
++        $offer = Offer::create($this->validateOffer($request));
++        return redirect()->route('admin.offers.index')
++            ->with('success', "Offer {$offer->title} created.");
++    }
++
++    public function edit(int $id): View
++    {
++        $offer = Offer::findOrFail($id);
++        Gate::authorize('update', $offer);
++        return $this->render('admin.offers.edit', 'Edit Offer', [
++            'offer'    => $offer,
++            'services' => Service::active()->get(['id', 'name']),
++        ]);
++    }
++
++    public function update(Request $request, int $id): RedirectResponse
++    {
++        $offer = Offer::findOrFail($id);
++        Gate::authorize('update', $offer);
++        $offer->update($this->validateOffer($request));
++        return redirect()->route('admin.offers.index')
++            ->with('success', "Offer {$offer->title} updated.");
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $offer = Offer::findOrFail($id);
++        Gate::authorize('delete', $offer);
++        $offer->delete();
++        return redirect()->route('admin.offers.index')
++            ->with('success', 'Offer removed.');
++    }
++
++    private function validateOffer(Request $request): array
++    {
++        return $request->validate([
++            'service_id'     => ['nullable', 'integer', 'exists:services,id'],
++            'title'          => ['required', 'string', 'max:140'],
++            'title_ar'       => ['nullable', 'string', 'max:140'],
++            'description'    => ['nullable', 'string', 'max:5000'],
++            'original_price' => ['required', 'numeric', 'min:0'],
++            'offer_price'    => ['required', 'numeric', 'min:0', 'lte:original_price'],
++            'badge_text'     => ['nullable', 'string', 'max:50'],
++            'terms'          => ['nullable', 'string', 'max:2000'],
++            'starts_at'      => ['nullable', 'date'],
++            'expires_at'     => ['nullable', 'date', 'after_or_equal:starts_at'],
++            'is_featured'    => ['nullable', 'boolean'],
++            'is_active'      => ['nullable', 'boolean'],
++            'sort_order'     => ['nullable', 'integer', 'min:0'],
++        ]);
++    }
++
++    private function render(string $view, string $title, array $data = [], ?string $records = null): View
++    {
++        return view()->exists($view)
++            ? view($view, $data)
++            : view('admin.placeholder', array_merge([
++                'pageTitle' => $title,
++                'records'   => $records,
++            ], $data));
++    }
++}
+diff --git a/app/Http/Controllers/Admin/ServiceManagementController.php b/app/Http/Controllers/Admin/ServiceManagementController.php
+new file mode 100644
+index 0000000..80087c6
+--- /dev/null
++++ b/app/Http/Controllers/Admin/ServiceManagementController.php
+@@ -0,0 +1,88 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use App\Models\Service;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
++
++class ServiceManagementController extends Controller
++{
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Service::class);
++        $services = Service::orderBy('sort_order')->orderBy('name')->get();
++        return $this->render('admin.services.index', 'Services', compact('services'), $services->count() . ' services');
++    }
++
++    public function create(): View
++    {
++        Gate::authorize('create', Service::class);
++        return $this->render('admin.services.create', 'Add Service');
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Service::class);
++        $service = Service::create($this->validateService($request));
++        return redirect()->route('admin.services.index')
++            ->with('success', "Service {$service->name} created.");
++    }
++
++    public function edit(int $id): View
++    {
++        $service = Service::findOrFail($id);
++        Gate::authorize('update', $service);
++        return $this->render('admin.services.edit', 'Edit Service', compact('service'));
++    }
++
++    public function update(Request $request, int $id): RedirectResponse
++    {
++        $service = Service::findOrFail($id);
++        Gate::authorize('update', $service);
++        $service->update($this->validateService($request));
++        return redirect()->route('admin.services.index')
++            ->with('success', "Service {$service->name} updated.");
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $service = Service::findOrFail($id);
++        Gate::authorize('delete', $service);
++        $service->delete();
++        return redirect()->route('admin.services.index')
++            ->with('success', 'Service removed.');
++    }
++
++    private function validateService(Request $request): array
++    {
++        return $request->validate([
++            'name'              => ['required', 'string', 'max:120'],
++            'name_ar'           => ['nullable', 'string', 'max:120'],
++            'slug'              => ['nullable', 'string', 'max:140'],
++            'category'          => ['nullable', 'string', 'max:80'],
++            'short_description' => ['nullable', 'string', 'max:300'],
++            'description'       => ['nullable', 'string', 'max:8000'],
++            'price_from'        => ['nullable', 'numeric', 'min:0'],
++            'price_to'          => ['nullable', 'numeric', 'min:0'],
++            'duration_minutes'  => ['nullable', 'integer', 'min:0', 'max:1440'],
++            'is_featured'       => ['nullable', 'boolean'],
++            'is_bookable'       => ['nullable', 'boolean'],
++            'is_active'         => ['nullable', 'boolean'],
++            'sort_order'        => ['nullable', 'integer', 'min:0'],
++        ]);
++    }
++
++    private function render(string $view, string $title, array $data = [], ?string $records = null): View
++    {
++        return view()->exists($view)
++            ? view($view, $data)
++            : view('admin.placeholder', array_merge([
++                'pageTitle' => $title,
++                'records'   => $records,
++            ], $data));
++    }
++}
+diff --git a/app/Http/Controllers/Admin/SettingController.php b/app/Http/Controllers/Admin/SettingController.php
+new file mode 100644
+index 0000000..ac7e405
+--- /dev/null
++++ b/app/Http/Controllers/Admin/SettingController.php
+@@ -0,0 +1,111 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Auth;
++use Illuminate\Support\Facades\DB;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\Support\Facades\Hash;
++use Illuminate\Support\Facades\Schema;
++use Illuminate\Validation\Rule;
++use Illuminate\View\View;
++
++class SettingController extends Controller
++{
++    /* ── Clinic-wide settings ───────────────────────────────── */
++
++    public function index(): View
++    {
++        Gate::authorize('manageSettings');
++
++        $settings = Schema::hasTable('settings')
++            ? DB::table('settings')->orderBy('group')->orderBy('id')->get()
++            : collect();
++
++        return view()->exists('admin.settings.index')
++            ? view('admin.settings.index', compact('settings'))
++            : view('admin.placeholder', [
++                'pageTitle' => 'Settings',
++                'records'   => $settings->count() . ' configured keys',
++                'settings'  => $settings,
++            ]);
++    }
++
++    public function update(Request $request): RedirectResponse
++    {
++        Gate::authorize('manageSettings');
++
++        $payload = $request->validate([
++            'settings'   => ['required', 'array'],
++            'settings.*' => ['nullable'],
++        ])['settings'];
++
++        if (Schema::hasTable('settings')) {
++            foreach ($payload as $key => $value) {
++                DB::table('settings')->updateOrInsert(
++                    ['key' => (string) $key],
++                    [
++                        'value'      => is_array($value) ? json_encode($value) : (string) $value,
++                        'updated_at' => now(),
++                        'created_at' => now(),
++                    ],
++                );
++            }
++        }
++
++        return redirect()->route('admin.settings.index')
++            ->with('success', 'Settings updated.');
++    }
++
++    /* ── Profile (current admin user) ───────────────────────── */
++
++    public function profile(): View
++    {
++        $user = Auth::user();
++        return view()->exists('admin.settings.profile')
++            ? view('admin.settings.profile', compact('user'))
++            : view('admin.placeholder', [
++                'pageTitle' => 'My Profile',
++                'records'   => $user?->email,
++                'user'      => $user,
++            ]);
++    }
++
++    public function updateProfile(Request $request): RedirectResponse
++    {
++        $user = Auth::user();
++
++        $data = $request->validate([
++            'name'  => ['required', 'string', 'max:120'],
++            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
++            'phone' => ['nullable', 'string', 'max:25'],
++        ]);
++
++        $user->update($data);
++
++        return redirect()->route('admin.settings.profile')
++            ->with('success', 'Profile updated.');
++    }
++
++    public function changePassword(Request $request): RedirectResponse
++    {
++        $user = Auth::user();
++
++        $data = $request->validate([
++            'current_password' => ['required', 'string'],
++            'password'         => ['required', 'string', 'min:8', 'confirmed'],
++        ]);
++
++        if (!Hash::check($data['current_password'], $user->password)) {
++            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
++        }
++
++        $user->update(['password' => $data['password']]);
++
++        return redirect()->route('admin.settings.profile')
++            ->with('success', 'Password changed successfully.');
++    }
++}
+diff --git a/app/Http/Controllers/Admin/TestimonialManagementController.php b/app/Http/Controllers/Admin/TestimonialManagementController.php
+new file mode 100644
+index 0000000..cbe376b
+--- /dev/null
++++ b/app/Http/Controllers/Admin/TestimonialManagementController.php
+@@ -0,0 +1,78 @@
++<?php
++
++namespace App\Http\Controllers\Admin;
++
++use App\Http\Controllers\Controller;
++use App\Models\Testimonial;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Gate;
++use Illuminate\View\View;
++
++class TestimonialManagementController extends Controller
++{
++    public function index(): View
++    {
++        Gate::authorize('viewAny', Testimonial::class);
++
++        $items = Testimonial::orderByDesc('is_approved')
++            ->orderByDesc('id')
++            ->get();
++
++        return view()->exists('admin.testimonials.index')
++            ? view('admin.testimonials.index', compact('items'))
++            : view('admin.placeholder', [
++                'pageTitle' => 'Testimonials',
++                'records'   => $items->count() . ' testimonials (' . $items->where('is_approved', false)->count() . ' awaiting approval)',
++                'items'     => $items,
++            ]);
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        Gate::authorize('create', Testimonial::class);
++
++        $data = $request->validate([
++            'name'         => ['required', 'string', 'max:120'],
++            'rating'       => ['required', 'integer', 'min:1', 'max:5'],
++            'title'        => ['nullable', 'string', 'max:150'],
++            'review'       => ['required', 'string', 'min:5', 'max:2000'],
++            'service'      => ['nullable', 'string', 'max:120'],
++            'source'       => ['nullable', 'in:internal,google,facebook,whatsapp'],
++            'is_featured'  => ['nullable', 'boolean'],
++            'is_approved'  => ['nullable', 'boolean'],
++            'is_active'    => ['nullable', 'boolean'],
++        ]);
++
++        Testimonial::create(array_merge($data, [
++            'source' => $data['source'] ?? 'internal',
++        ]));
++
++        return redirect()->route('admin.testimonials.index')
++            ->with('success', 'Testimonial added.');
++    }
++
++    public function approve(int $id): JsonResponse
++    {
++        $item = Testimonial::findOrFail($id);
++        Gate::authorize('update', $item);
++
++        $item->update(['is_approved' => true, 'is_active' => true]);
++
++        return response()->json([
++            'success'     => true,
++            'is_approved' => true,
++        ]);
++    }
++
++    public function destroy(int $id): RedirectResponse
++    {
++        $item = Testimonial::findOrFail($id);
++        Gate::authorize('delete', $item);
++        $item->delete();
++
++        return redirect()->route('admin.testimonials.index')
++            ->with('success', 'Testimonial removed.');
++    }
++}
+diff --git a/app/Http/Controllers/Api/BookingApiController.php b/app/Http/Controllers/Api/BookingApiController.php
+index e6fb9ec..2a174a1 100644
+--- a/app/Http/Controllers/Api/BookingApiController.php
++++ b/app/Http/Controllers/Api/BookingApiController.php
+@@ -43,52 +43,63 @@ public function store(StoreAppointmentRequest $request): JsonResponse
+         // Compute slot_end from doctor's slot_duration
+         $slotEnd = date('H:i', strtotime($data['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
+ 
+-        // Final slot availability check — race condition guard
+-        $occupied = Appointment::forDoctor($doctor->id)
+-            ->forDate($data['appointment_date'])
+-            ->active()
+-            ->where('slot_start', '<', $slotEnd)
+-            ->where('slot_end',   '>', $data['slot_start'])
+-            ->exists();
++        // Find or create a patient User record (outside the transaction —
++        // a failed user upsert must never roll back the appointment, and
++        // a failed appointment must never roll back the user record).
++        $patientUser = $this->resolvePatient($data);
+ 
+-        if ($occupied) {
++        // Re-check slot availability AND create the appointment atomically.
++        // Using lockForUpdate() inside the transaction prevents two
++        // concurrent requests from both passing the availability check.
++        try {
++            $appointment = DB::transaction(function () use ($data, $doctor, $service, $slotEnd, $patientUser): Appointment {
++
++                $occupied = Appointment::query()
++                    ->where('doctor_id', $doctor->id)
++                    ->where('appointment_date', $data['appointment_date'])
++                    ->whereIn('status', Appointment::ACTIVE_STATUSES)
++                    ->where('slot_start', '<', $slotEnd)
++                    ->where('slot_end',   '>', $data['slot_start'])
++                    ->lockForUpdate()
++                    ->exists();
++
++                if ($occupied) {
++                    // Throw a marker exception — caught below to convert
++                    // into a 422 JSON response without leaking details.
++                    throw new \App\Exceptions\SlotUnavailableException();
++                }
++
++                $autoConfirm = config('clinic.booking_confirmation', 'auto') === 'auto';
++
++                return Appointment::create([
++                    'reference'        => Appointment::generateReference(),
++                    'doctor_id'        => $doctor->id,
++                    'service_id'       => $service->id,
++                    'offer_id'         => isset($data['offer_id']) ? (int)$data['offer_id'] : null,
++                    'user_id'          => $patientUser?->id,
++                    'patient_name'     => $data['patient_name'],
++                    'patient_phone'    => $this->normalisePhone($data['patient_phone']),
++                    'patient_email'    => $data['patient_email'] ?? null,
++                    'appointment_date' => $data['appointment_date'],
++                    'slot_start'       => $data['slot_start'],
++                    'slot_end'         => $slotEnd,
++                    'notes'            => $data['notes'] ?? null,
++                    'source'           => Appointment::SOURCE_WEBSITE,
++                    'status'           => $autoConfirm
++                        ? Appointment::STATUS_CONFIRMED
++                        : Appointment::STATUS_PENDING,
++                    'confirmed_at'     => $autoConfirm ? now() : null,
++                    'price_quoted'     => $service->price_from,
++                    'payment_status'   => 'unpaid',
++                ]);
++            });
++        } catch (\App\Exceptions\SlotUnavailableException) {
+             return $this->error(
+                 'This time slot was just taken. Please select another time.',
+                 ['slot_start' => ['This slot is no longer available.']]
+             );
+         }
+ 
+-        // Find or create a patient User record
+-        $patientUser = $this->resolvePatient($data);
+-
+-        // Wrap in a transaction — both the user upsert and appointment must succeed together
+-        $appointment = DB::transaction(function () use ($data, $doctor, $service, $slotEnd, $patientUser): Appointment {
+-
+-            $autoConfirm = config('clinic.booking_confirmation', 'auto') === 'auto';
+-
+-            return Appointment::create([
+-                'reference'        => Appointment::generateReference(),
+-                'doctor_id'        => $doctor->id,
+-                'service_id'       => $service->id,
+-                'offer_id'         => isset($data['offer_id']) ? (int)$data['offer_id'] : null,
+-                'user_id'          => $patientUser?->id,
+-                'patient_name'     => $data['patient_name'],
+-                'patient_phone'    => $this->normalisePhone($data['patient_phone']),
+-                'patient_email'    => $data['patient_email'] ?? null,
+-                'appointment_date' => $data['appointment_date'],
+-                'slot_start'       => $data['slot_start'],
+-                'slot_end'         => $slotEnd,
+-                'notes'            => $data['notes'] ?? null,
+-                'source'           => Appointment::SOURCE_WEBSITE,
+-                'status'           => $autoConfirm
+-                    ? Appointment::STATUS_CONFIRMED
+-                    : Appointment::STATUS_PENDING,
+-                'confirmed_at'     => $autoConfirm ? now() : null,
+-                'price_quoted'     => $service->price_from,
+-                'payment_status'   => 'unpaid',
+-            ]);
+-        });
+-
+         return response()->json([
+             'success'   => true,
+             'message'   => 'Appointment booked successfully!',
+diff --git a/app/Http/Controllers/Api/BookingController.php b/app/Http/Controllers/Api/BookingController.php
+deleted file mode 100644
+index a7d9ac3..0000000
+--- a/app/Http/Controllers/Api/BookingController.php
++++ /dev/null
+@@ -1,204 +0,0 @@
+-<?php
+-
+-namespace App\Http\Controllers\Api;
+-
+-use App\Http\Controllers\Controller;
+-use App\Http\Requests\StoreAppointmentRequest;
+-use App\Models\Appointment;
+-use App\Models\Doctor;
+-use App\Models\Offer;
+-use App\Models\Service;
+-use App\Models\User;
+-use Illuminate\Http\JsonResponse;
+-use Illuminate\Http\Request;
+-use Illuminate\Support\Facades\DB;
+-
+-/**
+- * BookingApiController
+- *
+- * JSON API — consumed exclusively by the booking form's JavaScript.
+- *
+- * POST /api/booking
+- *   → { success, reference, redirect } on success
+- *   → { success:false, errors } on validation failure
+- *
+- * POST /api/booking/validate-slot
+- *   → { success, available } — non-destructive slot check
+- */
+-class BookingApiController extends Controller
+-{
+-    /* ── Create Appointment ─────────────────────────────────── */
+-
+-    /**
+-     * Validate, create, and persist a new appointment.
+-     * Returns JSON — the booking form JS handles the redirect.
+-     */
+-    public function store(StoreAppointmentRequest $request): JsonResponse
+-    {
+-        $data = $request->validated();
+-
+-        $doctor  = Doctor::active()->findOrFail((int)$data['doctor_id']);
+-        $service = Service::bookable()->findOrFail((int)$data['service_id']);
+-
+-        // Compute slot_end from doctor's slot_duration
+-        $slotEnd = date('H:i', strtotime($data['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
+-
+-        // Final slot availability check — race condition guard
+-        $occupied = Appointment::forDoctor($doctor->id)
+-            ->forDate($data['appointment_date'])
+-            ->active()
+-            ->where('slot_start', '<', $slotEnd)
+-            ->where('slot_end',   '>', $data['slot_start'])
+-            ->exists();
+-
+-        if ($occupied) {
+-            return $this->error(
+-                'This time slot was just taken. Please select another time.',
+-                ['slot_start' => ['This slot is no longer available.']]
+-            );
+-        }
+-
+-        // Find or create a patient User record
+-        $patientUser = $this->resolvePatient($data);
+-
+-        // Wrap in a transaction — both the user upsert and appointment must succeed together
+-        $appointment = DB::transaction(function () use ($data, $doctor, $service, $slotEnd, $patientUser): Appointment {
+-
+-            $autoConfirm = config('clinic.booking_confirmation', 'auto') === 'auto';
+-
+-            return Appointment::create([
+-                'reference'        => Appointment::generateReference(),
+-                'doctor_id'        => $doctor->id,
+-                'service_id'       => $service->id,
+-                'offer_id'         => isset($data['offer_id']) ? (int)$data['offer_id'] : null,
+-                'user_id'          => $patientUser?->id,
+-                'patient_name'     => $data['patient_name'],
+-                'patient_phone'    => $this->normalisePhone($data['patient_phone']),
+-                'patient_email'    => $data['patient_email'] ?? null,
+-                'appointment_date' => $data['appointment_date'],
+-                'slot_start'       => $data['slot_start'],
+-                'slot_end'         => $slotEnd,
+-                'notes'            => $data['notes'] ?? null,
+-                'source'           => Appointment::SOURCE_WEBSITE,
+-                'status'           => $autoConfirm
+-                    ? Appointment::STATUS_CONFIRMED
+-                    : Appointment::STATUS_PENDING,
+-                'confirmed_at'     => $autoConfirm ? now() : null,
+-                'price_quoted'     => $service->price_from,
+-                'payment_status'   => 'unpaid',
+-            ]);
+-        });
+-
+-        return response()->json([
+-            'success'   => true,
+-            'message'   => 'Appointment booked successfully!',
+-            'reference' => $appointment->reference,
+-            'redirect'  => route('booking.confirm', $appointment->reference),
+-        ], 201);
+-    }
+-
+-    /* ── Validate Slot (non-destructive) ────────────────────── */
+-
+-    /**
+-     * Check if a slot is still free without creating an appointment.
+-     * Called by the booking form when the user selects a time slot.
+-     */
+-    public function validateSlot(Request $request): JsonResponse
+-    {
+-        $validated = $request->validate([
+-            'doctor_id'        => ['required', 'integer', 'min:1'],
+-            'appointment_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+-            'slot_start'       => ['required', 'date_format:H:i'],
+-        ]);
+-
+-        $doctor  = Doctor::active()->find((int)$validated['doctor_id']);
+-        if (!$doctor) {
+-            return $this->error('Doctor not found.', 404);
+-        }
+-
+-        $slotEnd = date('H:i', strtotime($validated['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
+-
+-        $available = !Appointment::forDoctor($doctor->id)
+-            ->forDate($validated['appointment_date'])
+-            ->active()
+-            ->where('slot_start', '<', $slotEnd)
+-            ->where('slot_end',   '>', $validated['slot_start'])
+-            ->exists();
+-
+-        return response()->json([
+-            'success'   => true,
+-            'available' => $available,
+-        ]);
+-    }
+-
+-    /* ── Private Helpers ────────────────────────────────────── */
+-
+-    /**
+-     * Find or create a patient user record.
+-     * Never overwrites password or role of an existing user.
+-     */
+-    private function resolvePatient(array $data): ?User
+-    {
+-        try {
+-            $phone = $this->normalisePhone($data['patient_phone']);
+-            $email = $data['patient_email'] ?? null;
+-
+-            // Try to match by phone first
+-            $user = User::where('phone', $phone)->first();
+-
+-            if (!$user && $email) {
+-                $user = User::where('email', $email)->where('role', User::ROLE_PATIENT)->first();
+-            }
+-
+-            if ($user) {
+-                // Keep profile fresh — never touch password or role
+-                $user->fill(array_filter([
+-                    'name'  => $data['patient_name'],
+-                    'phone' => $phone,
+-                    'email' => $email ?: $user->email,
+-                ]))->save();
+-                return $user;
+-            }
+-
+-            return User::create([
+-                'name'     => $data['patient_name'],
+-                'phone'    => $phone,
+-                'email'    => $email ?? $phone . '@patient.local',
+-                'password' => bcrypt(bin2hex(random_bytes(16))), // random, not for login
+-                'role'     => User::ROLE_PATIENT,
+-                'is_active'=> true,
+-            ]);
+-        } catch (\Throwable) {
+-            // Never let user resolution fail the booking
+-            return null;
+-        }
+-    }
+-
+-    /**
+-     * Strip spaces/dashes, add Egypt country code where missing.
+-     */
+-    private function normalisePhone(string $phone): string
+-    {
+-        $clean = preg_replace('/[\s\-\(\)]/', '', $phone);
+-
+-        if (str_starts_with($clean, '01') && strlen($clean) === 11) {
+-            $clean = '+2' . $clean;
+-        }
+-
+-        return $clean;
+-    }
+-
+-    private function success(array $data, int $status = 200): JsonResponse
+-    {
+-        return response()->json(['success' => true, 'data' => $data], $status);
+-    }
+-
+-    private function error(string $message, array $errors = [], int $status = 422): JsonResponse
+-    {
+-        return response()->json([
+-            'success' => false,
+-            'message' => $message,
+-            'errors'  => $errors,
+-        ], $status);
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/Http/Controllers/ContactController.php b/app/Http/Controllers/ContactController.php
+new file mode 100644
+index 0000000..5a146cc
+--- /dev/null
++++ b/app/Http/Controllers/ContactController.php
+@@ -0,0 +1,46 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use Illuminate\Http\RedirectResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\DB;
++use Illuminate\Support\Facades\Schema;
++use Illuminate\View\View;
++
++class ContactController extends Controller
++{
++    public function index(): View
++    {
++        return view()->exists('pages.contact')
++            ? view('pages.contact')
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Contact Us',
++                'pageMessage' => 'Reach us at ' . config('clinic.phone', '+20 100 000 0000')
++                              . ' or ' . config('clinic.email', 'info@solyclinic.com') . '.',
++            ]);
++    }
++
++    public function store(Request $request): RedirectResponse
++    {
++        $data = $request->validate([
++            'name'    => ['required', 'string', 'max:120'],
++            'email'   => ['nullable', 'email', 'max:150'],
++            'phone'   => ['nullable', 'string', 'max:25'],
++            'subject' => ['nullable', 'string', 'max:200'],
++            'message' => ['required', 'string', 'min:10', 'max:2000'],
++        ]);
++
++        if (Schema::hasTable('contact_messages')) {
++            DB::table('contact_messages')->insert(array_merge($data, [
++                'ip_address' => $request->ip(),
++                'status'     => 'new',
++                'created_at' => now(),
++                'updated_at' => now(),
++            ]));
++        }
++
++        return redirect()->route('contact.index')
++            ->with('success', 'Thank you — we have received your message and will reply soon.');
++    }
++}
+diff --git a/app/Http/Controllers/DoctorController.php b/app/Http/Controllers/DoctorController.php
+index 4e71c8a..b1a6ffd 100644
+--- a/app/Http/Controllers/DoctorController.php
++++ b/app/Http/Controllers/DoctorController.php
+@@ -2,9 +2,36 @@
+ 
+ namespace App\Http\Controllers;
+ 
+-use Illuminate\Http\Request;
++use App\Models\Doctor;
++use Illuminate\View\View;
+ 
+ class DoctorController extends Controller
+ {
+-    //
++    public function index(): View
++    {
++        $doctors = Doctor::active()->get();
++
++        return view()->exists('pages.doctors')
++            ? view('pages.doctors', compact('doctors'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Our Doctors',
++                'pageMessage' => $doctors->isEmpty()
++                    ? 'Our team profiles are being prepared.'
++                    : 'Meet our team of ' . $doctors->count() . ' qualified specialists. Profiles coming soon.',
++            ]);
++    }
++
++    public function show(int $id): View
++    {
++        $doctor = Doctor::with('services:id,name,slug')
++            ->where('is_active', true)
++            ->findOrFail($id);
++
++        return view()->exists('pages.doctor-show')
++            ? view('pages.doctor-show', compact('doctor'))
++            : view('pages.placeholder', [
++                'pageTitle'   => $doctor->name,
++                'pageMessage' => $doctor->bio_excerpt ?? ($doctor->bio ?? 'Doctor profile coming soon.'),
++            ]);
++    }
+ }
+diff --git a/app/Http/Controllers/FaqController.php b/app/Http/Controllers/FaqController.php
+new file mode 100644
+index 0000000..4672ee1
+--- /dev/null
++++ b/app/Http/Controllers/FaqController.php
+@@ -0,0 +1,23 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use App\Models\Faq;
++use Illuminate\View\View;
++
++class FaqController extends Controller
++{
++    public function index(): View
++    {
++        $faqs = Faq::active()->orderBy('sort_order')->orderBy('id')->get();
++
++        return view()->exists('pages.faq')
++            ? view('pages.faq', compact('faqs'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Frequently Asked Questions',
++                'pageMessage' => $faqs->isEmpty()
++                    ? 'Our FAQ section is being prepared.'
++                    : 'Browse ' . $faqs->count() . ' frequently asked questions — full layout coming soon.',
++            ]);
++    }
++}
+diff --git a/app/Http/Controllers/GalleryController.php b/app/Http/Controllers/GalleryController.php
+new file mode 100644
+index 0000000..196fce9
+--- /dev/null
++++ b/app/Http/Controllers/GalleryController.php
+@@ -0,0 +1,26 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use App\Models\Gallery;
++use Illuminate\View\View;
++
++class GalleryController extends Controller
++{
++    public function index(): View
++    {
++        $items = Gallery::where('is_active', true)
++            ->orderByDesc('is_featured')
++            ->orderBy('sort_order')
++            ->get();
++
++        return view()->exists('pages.gallery')
++            ? view('pages.gallery', compact('items'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Gallery',
++                'pageMessage' => $items->isEmpty()
++                    ? 'Our before/after gallery is being prepared.'
++                    : 'View ' . $items->count() . ' gallery items — full layout coming soon.',
++            ]);
++    }
++}
+diff --git a/app/Http/Controllers/OfferController.php b/app/Http/Controllers/OfferController.php
+new file mode 100644
+index 0000000..a9ac803
+--- /dev/null
++++ b/app/Http/Controllers/OfferController.php
+@@ -0,0 +1,39 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use App\Models\Offer;
++use Illuminate\View\View;
++
++class OfferController extends Controller
++{
++    public function index(): View
++    {
++        $offers = Offer::active()->orderByDesc('is_featured')->orderBy('sort_order')->get();
++
++        return view()->exists('pages.offers')
++            ? view('pages.offers', compact('offers'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Special Offers',
++                'pageMessage' => $offers->isEmpty()
++                    ? 'No active offers right now — please check back soon.'
++                    : 'We currently have ' . $offers->count() . ' active offers — detailed pages coming soon.',
++            ]);
++    }
++
++    public function show(string $slug): View
++    {
++        $offer = Offer::with('service:id,name,slug')
++            ->where('is_active', true)
++            ->whereRaw('LOWER(title) = ?', [strtolower(str_replace('-', ' ', $slug))])
++            ->orWhere('id', is_numeric($slug) ? (int)$slug : 0)
++            ->firstOrFail();
++
++        return view()->exists('pages.offer-show')
++            ? view('pages.offer-show', compact('offer'))
++            : view('pages.placeholder', [
++                'pageTitle'   => $offer->title,
++                'pageMessage' => $offer->description ?: 'Offer details coming soon.',
++            ]);
++    }
++}
+diff --git a/app/Http/Controllers/ServiceController.php b/app/Http/Controllers/ServiceController.php
+index 0430a88..acd00f8 100644
+--- a/app/Http/Controllers/ServiceController.php
++++ b/app/Http/Controllers/ServiceController.php
+@@ -2,9 +2,34 @@
+ 
+ namespace App\Http\Controllers;
+ 
+-use Illuminate\Http\Request;
++use App\Models\Service;
++use Illuminate\View\View;
+ 
+ class ServiceController extends Controller
+ {
+-    //
++    public function index(): View
++    {
++        $services = Service::active()->get();
++
++        return view()->exists('pages.services')
++            ? view('pages.services', compact('services'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Our Services',
++                'pageMessage' => $services->isEmpty()
++                    ? 'Our service catalogue is being prepared.'
++                    : 'We currently offer ' . $services->count() . ' services. Detailed listings are coming soon.',
++            ]);
++    }
++
++    public function show(string $slug): View
++    {
++        $service = Service::where('slug', $slug)->where('is_active', true)->firstOrFail();
++
++        return view()->exists('pages.service-show')
++            ? view('pages.service-show', compact('service'))
++            : view('pages.placeholder', [
++                'pageTitle'   => $service->name,
++                'pageMessage' => $service->short_description ?: 'Detailed information about this service is being prepared.',
++            ]);
++    }
+ }
+diff --git a/app/Http/Controllers/SitemapController.php b/app/Http/Controllers/SitemapController.php
+new file mode 100644
+index 0000000..84deafe
+--- /dev/null
++++ b/app/Http/Controllers/SitemapController.php
+@@ -0,0 +1,60 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use App\Models\Service;
++use Illuminate\Http\Response;
++
++class SitemapController extends Controller
++{
++    public function index(): Response
++    {
++        $urls = [
++            ['loc' => route('home'),        'priority' => '1.0'],
++            ['loc' => route('services'),    'priority' => '0.9'],
++            ['loc' => route('doctors'),     'priority' => '0.9'],
++            ['loc' => route('booking'),     'priority' => '0.9'],
++            ['loc' => route('gallery'),     'priority' => '0.7'],
++            ['loc' => route('testimonials'),'priority' => '0.6'],
++            ['loc' => route('offers'),      'priority' => '0.8'],
++            ['loc' => route('faq'),         'priority' => '0.5'],
++            ['loc' => route('contact'),     'priority' => '0.6'],
++            ['loc' => route('privacy'),     'priority' => '0.3'],
++            ['loc' => route('terms'),       'priority' => '0.3'],
++        ];
++
++        try {
++            foreach (Service::active()->get(['slug']) as $service) {
++                $urls[] = [
++                    'loc'      => route('services.show', $service->slug),
++                    'priority' => '0.7',
++                ];
++            }
++        } catch (\Throwable) {
++            // Table not migrated yet — skip dynamic entries.
++        }
++
++        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
++        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
++        foreach ($urls as $u) {
++            $xml .= "  <url>\n";
++            $xml .= "    <loc>" . htmlspecialchars($u['loc'], ENT_XML1) . "</loc>\n";
++            $xml .= "    <priority>{$u['priority']}</priority>\n";
++            $xml .= "  </url>\n";
++        }
++        $xml .= '</urlset>' . "\n";
++
++        return response($xml, 200, ['Content-Type' => 'application/xml']);
++    }
++
++    public function robots(): Response
++    {
++        $body  = "User-agent: *\n";
++        $body .= "Disallow: /admin/\n";
++        $body .= "Disallow: /api/\n";
++        $body .= "Allow: /\n\n";
++        $body .= "Sitemap: " . route('sitemap') . "\n";
++
++        return response($body, 200, ['Content-Type' => 'text/plain']);
++    }
++}
+diff --git a/app/Http/Controllers/TestimonialController.php b/app/Http/Controllers/TestimonialController.php
+new file mode 100644
+index 0000000..988ba2f
+--- /dev/null
++++ b/app/Http/Controllers/TestimonialController.php
+@@ -0,0 +1,27 @@
++<?php
++
++namespace App\Http\Controllers;
++
++use App\Models\Testimonial;
++use Illuminate\View\View;
++
++class TestimonialController extends Controller
++{
++    public function index(): View
++    {
++        $testimonials = Testimonial::published()
++            ->orderByDesc('is_featured')
++            ->orderByDesc('rating')
++            ->orderBy('sort_order')
++            ->get();
++
++        return view()->exists('pages.testimonials')
++            ? view('pages.testimonials', compact('testimonials'))
++            : view('pages.placeholder', [
++                'pageTitle'   => 'Patient Testimonials',
++                'pageMessage' => $testimonials->isEmpty()
++                    ? 'Patient reviews will appear here soon.'
++                    : 'Read ' . $testimonials->count() . ' patient reviews — full layout coming soon.',
++            ]);
++    }
++}
+diff --git a/app/Http/Middleware/AdminMiddleware.php b/app/Http/Middleware/AdminMiddleware.php
+index d31ab4f..29e0908 100644
+--- a/app/Http/Middleware/AdminMiddleware.php
++++ b/app/Http/Middleware/AdminMiddleware.php
+@@ -14,13 +14,14 @@ class AdminMiddleware
+      */
+     public function handle(Request $request, Closure $next): Response
+     {
+-        if (!$request->user()) {
++        $user = $request->user();
++
++        if (!$user) {
+             return redirect()->route('admin.login')
+                 ->with('error', 'Please sign in to access the admin panel.');
+         }
+ 
+-        // Check admin role — adapt field name to your User model
+-        if (!in_array($request->user()->role ?? '', ['superadmin', 'admin', 'secretary', 'doctor'])) {
++        if (!$user->isStaff() || !$user->is_active) {
+             abort(403, 'Access denied. Admin privileges required.');
+         }
+ 
+diff --git a/app/Models/Models.php b/app/Models/Models.php
+deleted file mode 100644
+index e5f6f9c..0000000
+--- a/app/Models/Models.php
++++ /dev/null
+@@ -1,317 +0,0 @@
+-<?php
+-
+-namespace App\Models;
+-
+-use Illuminate\Database\Eloquent\Model;
+-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+-use Illuminate\Database\Eloquent\Relations\HasMany;
+-use Illuminate\Database\Eloquent\Builder;
+-use Illuminate\Support\Str;
+-
+-/* ════════════════════════════════════════════════════════════
+-   SERVICE MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Service extends Model
+-{
+-    protected $fillable = [
+-        'name', 'name_ar', 'slug', 'icon', 'category',
+-        'short_description', 'description', 'benefits', 'image',
+-        'price_from', 'price_to', 'price_label', 'duration_minutes',
+-        'meta_title', 'meta_description',
+-        'is_featured', 'is_bookable', 'is_active', 'sort_order',
+-    ];
+-
+-    protected $casts = [
+-        'benefits'    => 'array',
+-        'is_featured' => 'boolean',
+-        'is_bookable' => 'boolean',
+-        'is_active'   => 'boolean',
+-        'price_from'  => 'decimal:2',
+-        'price_to'    => 'decimal:2',
+-    ];
+-
+-    /* ── Boot ───────────────────────────────────────────────── */
+-    protected static function boot(): void
+-    {
+-        parent::boot();
+-        static::creating(function (self $model) {
+-            if (empty($model->slug)) {
+-                $model->slug = Str::slug($model->name);
+-            }
+-        });
+-    }
+-
+-    /* ── Relationships ──────────────────────────────────────── */
+-    public function doctors(): BelongsToMany
+-    {
+-        return $this->belongsToMany(Doctor::class);
+-    }
+-
+-    public function appointments(): HasMany
+-    {
+-        return $this->hasMany(Appointment::class);
+-    }
+-
+-    public function gallery(): HasMany
+-    {
+-        return $this->hasMany(Gallery::class);
+-    }
+-
+-    /* ── Scopes ─────────────────────────────────────────────── */
+-    public function scopeActive(Builder $q): Builder
+-    {
+-        return $q->where('is_active', true)->orderBy('sort_order');
+-    }
+-
+-    public function scopeFeatured(Builder $q): Builder
+-    {
+-        return $q->where('is_featured', true)->where('is_active', true)->orderBy('sort_order');
+-    }
+-
+-    public function scopeBookable(Builder $q): Builder
+-    {
+-        return $q->where('is_bookable', true)->where('is_active', true)->orderBy('sort_order');
+-    }
+-
+-    /* ── Accessors ──────────────────────────────────────────── */
+-    public function getImageUrlAttribute(): string
+-    {
+-        return $this->image ? asset('storage/' . $this->image) : asset('images/service-placeholder.jpg');
+-    }
+-
+-    public function getRouteKeyName(): string
+-    {
+-        return 'slug';
+-    }
+-}
+-
+-/* ════════════════════════════════════════════════════════════
+-   APPOINTMENT MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Appointment extends Model
+-{
+-    public const STATUS_PENDING     = 'pending';
+-    public const STATUS_CONFIRMED   = 'confirmed';
+-    public const STATUS_CANCELLED   = 'cancelled';
+-    public const STATUS_COMPLETED   = 'completed';
+-    public const STATUS_NO_SHOW     = 'no_show';
+-    public const STATUS_RESCHEDULED = 'rescheduled';
+-
+-    public const VALID_STATUSES = [
+-        self::STATUS_PENDING,
+-        self::STATUS_CONFIRMED,
+-        self::STATUS_CANCELLED,
+-        self::STATUS_COMPLETED,
+-        self::STATUS_NO_SHOW,
+-        self::STATUS_RESCHEDULED,
+-    ];
+-
+-    protected $fillable = [
+-        'reference', 'doctor_id', 'service_id', 'user_id', 'offer_id',
+-        'patient_name', 'patient_phone', 'patient_email',
+-        'appointment_date', 'slot_start', 'slot_end',
+-        'status', 'source', 'notes', 'admin_notes',
+-        'confirmed_by', 'cancelled_by', 'cancellation_reason',
+-        'confirmed_at', 'cancelled_at', 'completed_at', 'reminder_sent_at',
+-        'price_quoted', 'price_paid', 'payment_status', 'payment_method',
+-    ];
+-
+-    protected $casts = [
+-        'appointment_date' => 'date',
+-        'confirmed_at'     => 'datetime',
+-        'cancelled_at'     => 'datetime',
+-        'completed_at'     => 'datetime',
+-        'reminder_sent_at' => 'datetime',
+-        'price_quoted'     => 'decimal:2',
+-        'price_paid'       => 'decimal:2',
+-    ];
+-
+-    /* ── Relationships ──────────────────────────────────────── */
+-    public function doctor(): BelongsTo   { return $this->belongsTo(Doctor::class); }
+-    public function service(): BelongsTo  { return $this->belongsTo(Service::class); }
+-    public function user(): BelongsTo     { return $this->belongsTo(User::class); }
+-    public function offer(): BelongsTo    { return $this->belongsTo(Offer::class); }
+-
+-    /* ── Scopes ─────────────────────────────────────────────── */
+-    public function scopePending(Builder $q): Builder   { return $q->where('status', self::STATUS_PENDING); }
+-    public function scopeConfirmed(Builder $q): Builder { return $q->where('status', self::STATUS_CONFIRMED); }
+-    public function scopeToday(Builder $q): Builder     { return $q->whereDate('appointment_date', today()); }
+-
+-    public function scopeForDate(Builder $q, string $date): Builder
+-    {
+-        return $q->where('appointment_date', $date);
+-    }
+-
+-    public function scopeForDoctor(Builder $q, int $doctorId): Builder
+-    {
+-        return $q->where('doctor_id', $doctorId);
+-    }
+-
+-    public function scopeNotCancelled(Builder $q): Builder
+-    {
+-        return $q->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW]);
+-    }
+-
+-    /* ── Helpers ────────────────────────────────────────────── */
+-    public static function generateReference(): string
+-    {
+-        do {
+-            $ref = 'SDC-' . date('Y') . strtoupper(substr(bin2hex(random_bytes(3)), 0, 5));
+-        } while (self::where('reference', $ref)->exists());
+-        return $ref;
+-    }
+-
+-    public function isSlotAvailable(): bool
+-    {
+-        return !self::where('doctor_id', $this->doctor_id)
+-            ->where('appointment_date', $this->appointment_date)
+-            ->where('id', '!=', $this->id ?? 0)
+-            ->notCancelled()
+-            ->where('slot_start', '<', $this->slot_end)
+-            ->where('slot_end', '>', $this->slot_start)
+-            ->exists();
+-    }
+-}
+-
+-/* ════════════════════════════════════════════════════════════
+-   TESTIMONIAL MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Testimonial extends Model
+-{
+-    protected $fillable = [
+-        'user_id', 'appointment_id', 'name', 'avatar', 'rating',
+-        'title', 'review', 'service', 'source', 'google_review_url',
+-        'is_featured', 'is_approved', 'is_active', 'sort_order',
+-    ];
+-
+-    protected $casts = [
+-        'rating'      => 'integer',
+-        'is_featured' => 'boolean',
+-        'is_approved' => 'boolean',
+-        'is_active'   => 'boolean',
+-    ];
+-
+-    public function user(): BelongsTo        { return $this->belongsTo(User::class); }
+-    public function appointment(): BelongsTo { return $this->belongsTo(Appointment::class); }
+-
+-    public function scopePublished(Builder $q): Builder
+-    {
+-        return $q->where('is_active', true)->where('is_approved', true);
+-    }
+-
+-    public function scopeFeatured(Builder $q): Builder
+-    {
+-        return $q->published()->where('is_featured', true);
+-    }
+-
+-    public function getAvatarUrlAttribute(): ?string
+-    {
+-        return $this->avatar ? asset('storage/' . $this->avatar) : null;
+-    }
+-}
+-
+-/* ════════════════════════════════════════════════════════════
+-   GALLERY MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Gallery extends Model
+-{
+-    protected $table = 'galleries';
+-
+-    protected $fillable = [
+-        'service_id', 'type', 'title', 'description',
+-        'before_image', 'after_image', 'image',
+-        'treatment', 'is_featured', 'is_active', 'sort_order',
+-    ];
+-
+-    protected $casts = [
+-        'is_featured' => 'boolean',
+-        'is_active'   => 'boolean',
+-    ];
+-
+-    public function service(): BelongsTo { return $this->belongsTo(Service::class); }
+-
+-    public function scopeActive(Builder $q): Builder      { return $q->where('is_active', true); }
+-    public function scopeBeforeAfter(Builder $q): Builder { return $q->where('type', 'before_after'); }
+-
+-    public function getBeforeImageUrlAttribute(): string
+-    {
+-        return $this->before_image ? asset('storage/' . $this->before_image) : asset('images/placeholder.jpg');
+-    }
+-
+-    public function getAfterImageUrlAttribute(): string
+-    {
+-        return $this->after_image ? asset('storage/' . $this->after_image) : asset('images/placeholder.jpg');
+-    }
+-}
+-
+-/* ════════════════════════════════════════════════════════════
+-   OFFER MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Offer extends Model
+-{
+-    protected $fillable = [
+-        'service_id', 'title', 'title_ar', 'description', 'image',
+-        'original_price', 'offer_price', 'badge_text', 'terms',
+-        'starts_at', 'expires_at', 'is_featured', 'is_active', 'sort_order',
+-    ];
+-
+-    protected $casts = [
+-        'original_price' => 'decimal:2',
+-        'offer_price'    => 'decimal:2',
+-        'starts_at'      => 'datetime',
+-        'expires_at'     => 'datetime',
+-        'is_featured'    => 'boolean',
+-        'is_active'      => 'boolean',
+-    ];
+-
+-    public function service(): BelongsTo { return $this->belongsTo(Service::class); }
+-
+-    public function scopeActive(Builder $q): Builder
+-    {
+-        return $q->where('is_active', true)
+-                 ->where('starts_at', '<=', now())
+-                 ->where(fn($s) => $s->whereNull('expires_at')->orWhere('expires_at', '>=', now()));
+-    }
+-
+-    public function getDiscountPercentAttribute(): int
+-    {
+-        if (!$this->original_price || $this->original_price == 0) return 0;
+-        return (int) round((1 - $this->offer_price / $this->original_price) * 100);
+-    }
+-
+-    public function getImageUrlAttribute(): string
+-    {
+-        return $this->image ? asset('storage/' . $this->image) : asset('images/offer-placeholder.jpg');
+-    }
+-}
+-
+-/* ════════════════════════════════════════════════════════════
+-   FAQ MODEL
+-   ════════════════════════════════════════════════════════════ */
+-
+-class Faq extends Model
+-{
+-    protected $fillable = [
+-        'category', 'question', 'question_ar', 'answer', 'answer_ar',
+-        'is_featured', 'is_active', 'sort_order',
+-    ];
+-
+-    protected $casts = [
+-        'is_featured' => 'boolean',
+-        'is_active'   => 'boolean',
+-    ];
+-
+-    public function scopeActive(Builder $q): Builder   { return $q->where('is_active', true)->orderBy('sort_order'); }
+-    public function scopeFeatured(Builder $q): Builder { return $q->active()->where('is_featured', true); }
+-
+-    public function scopeByCategory(Builder $q, string $cat): Builder
+-    {
+-        return $q->active()->where('category', $cat);
+-    }
+-}
+diff --git a/app/Policies/AppointmentPolicy.php b/app/Policies/AppointmentPolicy.php
+new file mode 100644
+index 0000000..b2045fc
+--- /dev/null
++++ b/app/Policies/AppointmentPolicy.php
+@@ -0,0 +1,57 @@
++<?php
++
++namespace App\Policies;
++
++use App\Models\Appointment;
++use App\Models\User;
++
++/**
++ * Appointments are the day-to-day work of the secretary, so secretaries
++ * have full create/update access. Doctors can only view their own
++ * appointments.
++ */
++class AppointmentPolicy extends BasePolicy
++{
++    public function viewAny(User $user): bool
++    {
++        return $user->isStaff();
++    }
++
++    public function view(User $user, $appointment = null): bool
++    {
++        if ($user->isAdmin() || $user->isSecretary()) {
++            return true;
++        }
++
++        if ($user->isDoctor() && $appointment instanceof Appointment) {
++            return $appointment->doctor_id === $user->id
++                || $appointment->doctor?->email === $user->email;
++        }
++
++        return false;
++    }
++
++    public function create(User $user): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++
++    public function update(User $user, $appointment = null): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++
++    /**
++     * Cancelling is a status update — same rule.
++     */
++    public function cancel(User $user, $appointment = null): bool
++    {
++        return $this->update($user, $appointment);
++    }
++
++    public function delete(User $user, $appointment = null): bool
++    {
++        // Only admin+ can hard-delete an appointment.
++        return $user->isAdmin();
++    }
++}
+diff --git a/app/Policies/BasePolicy.php b/app/Policies/BasePolicy.php
+new file mode 100644
+index 0000000..d40d11e
+--- /dev/null
++++ b/app/Policies/BasePolicy.php
+@@ -0,0 +1,84 @@
++<?php
++
++namespace App\Policies;
++
++use App\Models\User;
++
++/**
++ * BasePolicy
++ *
++ * Shared role-based helpers used by every concrete policy.
++ *
++ * Role capability matrix (defaults — policies may override):
++ *
++ *   capability     | superadmin | admin | secretary | doctor
++ *   --------------|------------|-------|-----------|-------
++ *   viewAny       |    yes     | yes   |   yes     |  yes
++ *   view          |    yes     | yes   |   yes     |  yes
++ *   create        |    yes     | yes   |   no      |  no
++ *   update        |    yes     | yes   |   no      |  no
++ *   delete        |    yes     | no    |   no      |  no
++ *   forceDelete   |    yes     | no    |   no      |  no
++ *   restore       |    yes     | yes   |   no      |  no
++ *
++ * Individual policies (AppointmentPolicy, GalleryPolicy, etc.) widen
++ * permissions for specific cases — e.g. secretaries can update
++ * appointments, doctors can view their own schedule.
++ */
++abstract class BasePolicy
++{
++    /**
++     * Laravel calls before() on every gate check.
++     * Returning true grants permission unconditionally; returning null
++     * lets the individual ability method decide.
++     */
++    public function before(User $user, string $ability): ?bool
++    {
++        if (!$user->is_active) {
++            return false;
++        }
++
++        if ($user->isSuperAdmin()) {
++            return true;
++        }
++
++        return null;
++    }
++
++    /* ── Defaults — admin can do most things ────────────────── */
++
++    public function viewAny(User $user): bool
++    {
++        return $user->isStaff();
++    }
++
++    public function view(User $user, $model = null): bool
++    {
++        return $user->isStaff();
++    }
++
++    public function create(User $user): bool
++    {
++        return $user->isAdmin();
++    }
++
++    public function update(User $user, $model = null): bool
++    {
++        return $user->isAdmin();
++    }
++
++    public function delete(User $user, $model = null): bool
++    {
++        return $user->isAdmin();
++    }
++
++    public function restore(User $user, $model = null): bool
++    {
++        return $user->isAdmin();
++    }
++
++    public function forceDelete(User $user, $model = null): bool
++    {
++        return false; // superadmin only via before()
++    }
++}
+diff --git a/app/Policies/DoctorPolicy.php b/app/Policies/DoctorPolicy.php
+new file mode 100644
+index 0000000..868aa67
+--- /dev/null
++++ b/app/Policies/DoctorPolicy.php
+@@ -0,0 +1,9 @@
++<?php
++
++namespace App\Policies;
++
++class DoctorPolicy extends BasePolicy
++{
++    // Inherits defaults — only admin+ can manage doctor records.
++    // Secretaries and doctors can view but not modify.
++}
+diff --git a/app/Policies/FaqPolicy.php b/app/Policies/FaqPolicy.php
+new file mode 100644
+index 0000000..2fb26c7
+--- /dev/null
++++ b/app/Policies/FaqPolicy.php
+@@ -0,0 +1,8 @@
++<?php
++
++namespace App\Policies;
++
++class FaqPolicy extends BasePolicy
++{
++    // Default rules apply — admin+ only.
++}
+diff --git a/app/Policies/GalleryPolicy.php b/app/Policies/GalleryPolicy.php
+new file mode 100644
+index 0000000..6154e3b
+--- /dev/null
++++ b/app/Policies/GalleryPolicy.php
+@@ -0,0 +1,19 @@
++<?php
++
++namespace App\Policies;
++
++use App\Models\User;
++
++class GalleryPolicy extends BasePolicy
++{
++    // Secretaries can upload gallery items but not delete them.
++    public function create(User $user): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++
++    public function update(User $user, $gallery = null): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++}
+diff --git a/app/Policies/OfferPolicy.php b/app/Policies/OfferPolicy.php
+new file mode 100644
+index 0000000..bf173a3
+--- /dev/null
++++ b/app/Policies/OfferPolicy.php
+@@ -0,0 +1,8 @@
++<?php
++
++namespace App\Policies;
++
++class OfferPolicy extends BasePolicy
++{
++    // Default rules apply.
++}
+diff --git a/app/Policies/ServicePolicy.php b/app/Policies/ServicePolicy.php
+new file mode 100644
+index 0000000..ff34769
+--- /dev/null
++++ b/app/Policies/ServicePolicy.php
+@@ -0,0 +1,8 @@
++<?php
++
++namespace App\Policies;
++
++class ServicePolicy extends BasePolicy
++{
++    // Default rules apply — admin+ only for create/update/delete.
++}
+diff --git a/app/Policies/TestimonialPolicy.php b/app/Policies/TestimonialPolicy.php
+new file mode 100644
+index 0000000..a157d8e
+--- /dev/null
++++ b/app/Policies/TestimonialPolicy.php
+@@ -0,0 +1,24 @@
++<?php
++
++namespace App\Policies;
++
++use App\Models\User;
++
++class TestimonialPolicy extends BasePolicy
++{
++    // Secretaries can add testimonials and approve them, but cannot delete.
++    public function create(User $user): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++
++    public function update(User $user, $testimonial = null): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++
++    public function approve(User $user): bool
++    {
++        return $user->isAdmin() || $user->isSecretary();
++    }
++}
+diff --git a/app/Providers/AppServiceProvider.php b/app/Providers/AppServiceProvider.php
+index 452e6b6..ea6dc71 100644
+--- a/app/Providers/AppServiceProvider.php
++++ b/app/Providers/AppServiceProvider.php
+@@ -2,6 +2,22 @@
+ 
+ namespace App\Providers;
+ 
++use App\Models\Appointment;
++use App\Models\Doctor;
++use App\Models\Faq;
++use App\Models\Gallery;
++use App\Models\Offer;
++use App\Models\Service;
++use App\Models\Testimonial;
++use App\Models\User;
++use App\Policies\AppointmentPolicy;
++use App\Policies\DoctorPolicy;
++use App\Policies\FaqPolicy;
++use App\Policies\GalleryPolicy;
++use App\Policies\OfferPolicy;
++use App\Policies\ServicePolicy;
++use App\Policies\TestimonialPolicy;
++use Illuminate\Support\Facades\Gate;
+ use Illuminate\Support\ServiceProvider;
+ 
+ class AppServiceProvider extends ServiceProvider
+@@ -19,6 +35,35 @@ public function register(): void
+      */
+     public function boot(): void
+     {
+-        //
++        $this->registerPolicies();
++        $this->registerGates();
++    }
++
++    private function registerPolicies(): void
++    {
++        Gate::policy(Appointment::class,  AppointmentPolicy::class);
++        Gate::policy(Doctor::class,       DoctorPolicy::class);
++        Gate::policy(Service::class,      ServicePolicy::class);
++        Gate::policy(Offer::class,        OfferPolicy::class);
++        Gate::policy(Gallery::class,      GalleryPolicy::class);
++        Gate::policy(Testimonial::class,  TestimonialPolicy::class);
++        Gate::policy(Faq::class,          FaqPolicy::class);
++    }
++
++    private function registerGates(): void
++    {
++        // Superadmin shortcut — granted for every gate check.
++        Gate::before(function (User $user, string $ability) {
++            if (!$user->is_active) {
++                return false;
++            }
++            return $user->isSuperAdmin() ? true : null;
++        });
++
++        // Clinic-wide settings: superadmin + admin only.
++        Gate::define('manageSettings', fn (User $user) => $user->isAdmin());
++
++        // User management: superadmin only (enforced via Gate::before).
++        Gate::define('manageUsers',    fn (User $user) => false);
+     }
+ }
+diff --git a/database/migrations/0001_01_01_000000_create_users_table.php b/database/migrations/0001_01_01_000000_create_users_table.php
+deleted file mode 100644
+index 05fb5d9..0000000
+--- a/database/migrations/0001_01_01_000000_create_users_table.php
++++ /dev/null
+@@ -1,49 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-return new class extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     */
+-    public function up(): void
+-    {
+-        Schema::create('users', function (Blueprint $table) {
+-            $table->id();
+-            $table->string('name');
+-            $table->string('email')->unique();
+-            $table->timestamp('email_verified_at')->nullable();
+-            $table->string('password');
+-            $table->rememberToken();
+-            $table->timestamps();
+-        });
+-
+-        Schema::create('password_reset_tokens', function (Blueprint $table) {
+-            $table->string('email')->primary();
+-            $table->string('token');
+-            $table->timestamp('created_at')->nullable();
+-        });
+-
+-        Schema::create('sessions', function (Blueprint $table) {
+-            $table->string('id')->primary();
+-            $table->foreignId('user_id')->nullable()->index();
+-            $table->string('ip_address', 45)->nullable();
+-            $table->text('user_agent')->nullable();
+-            $table->longText('payload');
+-            $table->integer('last_activity')->index();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     */
+-    public function down(): void
+-    {
+-        Schema::dropIfExists('users');
+-        Schema::dropIfExists('password_reset_tokens');
+-        Schema::dropIfExists('sessions');
+-    }
+-};
+diff --git a/database/migrations/2026_05_18_225213_create_testimonials_table.php b/database/migrations/2026_05_18_225213_create_testimonials_table.php
+deleted file mode 100644
+index 0ce9a08..0000000
+--- a/database/migrations/2026_05_18_225213_create_testimonials_table.php
++++ /dev/null
+@@ -1,27 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-return new class extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     */
+-    public function up(): void
+-    {
+-        Schema::create('testimonials', function (Blueprint $table) {
+-            $table->id();
+-            $table->timestamps();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     */
+-    public function down(): void
+-    {
+-        Schema::dropIfExists('testimonials');
+-    }
+-};
+diff --git a/database/migrations/2026_05_20_000000_add_doctor_appointment_index.php b/database/migrations/2026_05_20_000000_add_doctor_appointment_index.php
+new file mode 100644
+index 0000000..ca1ccc5
+--- /dev/null
++++ b/database/migrations/2026_05_20_000000_add_doctor_appointment_index.php
+@@ -0,0 +1,34 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++/**
++ * Add a [doctor_id, appointment_date] composite index.
++ *
++ * Doctor::availableSlots() filters by doctor_id first, then by
++ * appointment_date. The existing [appointment_date, doctor_id] index
++ * only helps when the leading column (appointment_date) is in the
++ * WHERE clause. Adding the reverse composite gives the planner an
++ * index it can use when the doctor filter comes first.
++ *
++ * Safe to run on SQLite and MySQL — both support CREATE INDEX on
++ * existing columns. Down migration drops the index by name.
++ */
++return new class extends Migration
++{
++    public function up(): void
++    {
++        Schema::table('appointments', function (Blueprint $table) {
++            $table->index(['doctor_id', 'appointment_date'], 'appointments_doctor_date_index');
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::table('appointments', function (Blueprint $table) {
++            $table->dropIndex('appointments_doctor_date_index');
++        });
++    }
++};
+diff --git a/resources/views/admin/placeholder.blade.php b/resources/views/admin/placeholder.blade.php
+new file mode 100644
+index 0000000..9a7a14c
+--- /dev/null
++++ b/resources/views/admin/placeholder.blade.php
+@@ -0,0 +1,25 @@
++@extends('layouts.admin')
++
++@section('title', $pageTitle ?? 'Admin')
++@section('breadcrumb', $pageTitle ?? '')
++
++@section('content')
++<div style="padding: 2rem;">
++    <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: .75rem; padding: 2rem; max-width: 720px;">
++        <h1 style="font-size: 1.5rem; margin-bottom: .75rem;">{{ $pageTitle ?? 'Module' }}</h1>
++        <p style="color: #6b7280; line-height: 1.6;">
++            {{ $pageMessage ?? 'This admin module is functional but its UI is being prepared. Underlying data is loaded and listed below for reference.' }}
++        </p>
++
++        @isset($records)
++            <p style="margin-top: 1.25rem; font-size: .875rem; color: #374151;">
++                <strong>Records:</strong> {{ $records }}
++            </p>
++        @endisset
++
++        <p style="margin-top: 1.5rem;">
++            <a href="{{ route('admin.dashboard') }}" class="btn">← Back to Dashboard</a>
++        </p>
++    </div>
++</div>
++@endsection
+diff --git a/resources/views/pages/placeholder.blade.php b/resources/views/pages/placeholder.blade.php
+new file mode 100644
+index 0000000..c50d83d
+--- /dev/null
++++ b/resources/views/pages/placeholder.blade.php
+@@ -0,0 +1,18 @@
++@extends('layouts.app')
++
++@section('title', ($pageTitle ?? 'Coming Soon') . ' — Soly Clinic')
++
++@section('content')
++<section style="padding: 6rem 1.5rem; text-align: center; max-width: 720px; margin: 0 auto;">
++    <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 1rem;">
++        {{ $pageTitle ?? 'Coming Soon' }}
++    </h1>
++    <p style="color: #555; font-size: 1.05rem; line-height: 1.7;">
++        {{ $pageMessage ?? "This page is being prepared. Please check back shortly or contact us directly." }}
++    </p>
++    <p style="margin-top: 2rem;">
++        <a href="{{ route('home') }}" class="btn btn--primary">Back to Home</a>
++        <a href="{{ route('booking') }}" class="btn btn--outline" style="margin-left: .5rem;">Book Appointment</a>
++    </p>
++</section>
++@endsection

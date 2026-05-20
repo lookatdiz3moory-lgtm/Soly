@@ -14,13 +14,14 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user()) {
+        $user = $request->user();
+
+        if (!$user) {
             return redirect()->route('admin.login')
                 ->with('error', 'Please sign in to access the admin panel.');
         }
 
-        // Check admin role — adapt field name to your User model
-        if (!in_array($request->user()->role ?? '', ['superadmin', 'admin', 'secretary', 'doctor'])) {
+        if (!$user->isStaff() || !$user->is_active) {
             abort(403, 'Access denied. Admin privileges required.');
         }
 

@@ -10,7 +10,6 @@ use App\Models\Testimonial;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -46,14 +45,16 @@ class DashboardController extends Controller
 
     private function buildStats(): array
     {
-        $today = today()->toDateString();
-        $month = today()->format('Y-m');
+        $year  = today()->year;
+        $month = today()->month;
 
         return [
             // Volume
             'total_appointments' => Appointment::count(),
             'today_count'        => Appointment::today()->count(),
-            'month_count'        => Appointment::whereRaw("DATE_FORMAT(appointment_date,'%Y-%m') = ?", [$month])->count(),
+            'month_count'        => Appointment::whereYear('appointment_date', $year)
+                                               ->whereMonth('appointment_date', $month)
+                                               ->count(),
 
             // Status breakdown
             'pending'    => Appointment::pending()->count(),
@@ -70,7 +71,8 @@ class DashboardController extends Controller
             // Patients
             'total_patients' => User::patients()->count(),
             'new_patients_month' => User::patients()
-                ->whereRaw("DATE_FORMAT(created_at,'%Y-%m') = ?", [$month])
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
                 ->count(),
 
             // Revenue (completed appointments with price_paid set)
@@ -79,7 +81,8 @@ class DashboardController extends Controller
                 ->sum('price_paid'),
             'revenue_month' => (float) Appointment::completed()
                 ->whereNotNull('price_paid')
-                ->whereRaw("DATE_FORMAT(appointment_date,'%Y-%m') = ?", [$month])
+                ->whereYear('appointment_date', $year)
+                ->whereMonth('appointment_date', $month)
                 ->sum('price_paid'),
 
             // Clinic
@@ -110,16 +113,13 @@ class DashboardController extends Controller
 
     private function weeklyBookings(): array
     {
-        // Last 7 days, grouped by date
-        $rows = DB::select("
-            SELECT
-                DATE(created_at) as day,
-                COUNT(*) as count
-            FROM appointments
-            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-            GROUP BY DATE(created_at)
-            ORDER BY day ASC
-        ");
+        // Fetch created_at for the past 7 days and group by date in PHP —
+        // avoids any database-specific date functions entirely.
+        $counts = Appointment::query()
+            ->where('created_at', '>=', today()->subDays(6)->toDateString())
+            ->get(['created_at'])
+            ->groupBy(fn ($a) => $a->created_at->toDateString())
+            ->map(fn ($group) => $group->count());
 
         // Build a full 7-day array, filling gaps with 0
         $result = [];
@@ -128,16 +128,8 @@ class DashboardController extends Controller
             $result[] = [
                 'date'  => $date,
                 'label' => today()->subDays($i)->format('D'),
-                'count' => 0,
+                'count' => $counts->get($date, 0),
             ];
-        }
-
-        foreach ($rows as $row) {
-            foreach ($result as &$slot) {
-                if ($slot['date'] === $row->day) {
-                    $slot['count'] = (int) $row->count;
-                }
-            }
         }
 
         return $result;

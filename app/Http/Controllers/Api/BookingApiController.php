@@ -43,51 +43,62 @@ class BookingApiController extends Controller
         // Compute slot_end from doctor's slot_duration
         $slotEnd = date('H:i', strtotime($data['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
 
-        // Final slot availability check — race condition guard
-        $occupied = Appointment::forDoctor($doctor->id)
-            ->forDate($data['appointment_date'])
-            ->active()
-            ->where('slot_start', '<', $slotEnd)
-            ->where('slot_end',   '>', $data['slot_start'])
-            ->exists();
+        // Find or create a patient User record (outside the transaction —
+        // a failed user upsert must never roll back the appointment, and
+        // a failed appointment must never roll back the user record).
+        $patientUser = $this->resolvePatient($data);
 
-        if ($occupied) {
+        // Re-check slot availability AND create the appointment atomically.
+        // Using lockForUpdate() inside the transaction prevents two
+        // concurrent requests from both passing the availability check.
+        try {
+            $appointment = DB::transaction(function () use ($data, $doctor, $service, $slotEnd, $patientUser): Appointment {
+
+                $occupied = Appointment::query()
+                    ->where('doctor_id', $doctor->id)
+                    ->where('appointment_date', $data['appointment_date'])
+                    ->whereIn('status', Appointment::ACTIVE_STATUSES)
+                    ->where('slot_start', '<', $slotEnd)
+                    ->where('slot_end',   '>', $data['slot_start'])
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($occupied) {
+                    // Throw a marker exception — caught below to convert
+                    // into a 422 JSON response without leaking details.
+                    throw new \App\Exceptions\SlotUnavailableException();
+                }
+
+                $autoConfirm = config('clinic.booking_confirmation', 'auto') === 'auto';
+
+                return Appointment::create([
+                    'reference'        => Appointment::generateReference(),
+                    'doctor_id'        => $doctor->id,
+                    'service_id'       => $service->id,
+                    'offer_id'         => isset($data['offer_id']) ? (int)$data['offer_id'] : null,
+                    'user_id'          => $patientUser?->id,
+                    'patient_name'     => $data['patient_name'],
+                    'patient_phone'    => $this->normalisePhone($data['patient_phone']),
+                    'patient_email'    => $data['patient_email'] ?? null,
+                    'appointment_date' => $data['appointment_date'],
+                    'slot_start'       => $data['slot_start'],
+                    'slot_end'         => $slotEnd,
+                    'notes'            => $data['notes'] ?? null,
+                    'source'           => Appointment::SOURCE_WEBSITE,
+                    'status'           => $autoConfirm
+                        ? Appointment::STATUS_CONFIRMED
+                        : Appointment::STATUS_PENDING,
+                    'confirmed_at'     => $autoConfirm ? now() : null,
+                    'price_quoted'     => $service->price_from,
+                    'payment_status'   => 'unpaid',
+                ]);
+            });
+        } catch (\App\Exceptions\SlotUnavailableException) {
             return $this->error(
                 'This time slot was just taken. Please select another time.',
                 ['slot_start' => ['This slot is no longer available.']]
             );
         }
-
-        // Find or create a patient User record
-        $patientUser = $this->resolvePatient($data);
-
-        // Wrap in a transaction — both the user upsert and appointment must succeed together
-        $appointment = DB::transaction(function () use ($data, $doctor, $service, $slotEnd, $patientUser): Appointment {
-
-            $autoConfirm = config('clinic.booking_confirmation', 'auto') === 'auto';
-
-            return Appointment::create([
-                'reference'        => Appointment::generateReference(),
-                'doctor_id'        => $doctor->id,
-                'service_id'       => $service->id,
-                'offer_id'         => isset($data['offer_id']) ? (int)$data['offer_id'] : null,
-                'user_id'          => $patientUser?->id,
-                'patient_name'     => $data['patient_name'],
-                'patient_phone'    => $this->normalisePhone($data['patient_phone']),
-                'patient_email'    => $data['patient_email'] ?? null,
-                'appointment_date' => $data['appointment_date'],
-                'slot_start'       => $data['slot_start'],
-                'slot_end'         => $slotEnd,
-                'notes'            => $data['notes'] ?? null,
-                'source'           => Appointment::SOURCE_WEBSITE,
-                'status'           => $autoConfirm
-                    ? Appointment::STATUS_CONFIRMED
-                    : Appointment::STATUS_PENDING,
-                'confirmed_at'     => $autoConfirm ? now() : null,
-                'price_quoted'     => $service->price_from,
-                'payment_status'   => 'unpaid',
-            ]);
-        });
 
         return response()->json([
             'success'   => true,

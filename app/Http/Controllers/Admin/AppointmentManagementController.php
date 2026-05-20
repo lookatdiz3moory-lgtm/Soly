@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 /**
@@ -31,6 +32,8 @@ class AppointmentManagementController extends Controller
 
     public function index(Request $request): View
     {
+        Gate::authorize('viewAny', Appointment::class);
+
         $query = Appointment::with(['doctor:id,name', 'service:id,name'])
             ->orderByDesc('appointment_date')
             ->orderByDesc('slot_start');
@@ -79,6 +82,8 @@ class AppointmentManagementController extends Controller
             'user:id,name,email',
         ])->findOrFail($id);
 
+        Gate::authorize('view', $appointment);
+
         return view('admin.appointments.show', [
             'appointment' => $appointment,
             'statuses'    => Appointment::VALID_STATUSES,
@@ -90,6 +95,8 @@ class AppointmentManagementController extends Controller
 
     public function create(): View
     {
+        Gate::authorize('create', Appointment::class);
+
         return view('admin.appointments.create', [
             'services' => Service::bookable()->get(['id', 'name']),
             'doctors'  => Doctor::active()->get(['id', 'name', 'slot_duration']),
@@ -99,6 +106,8 @@ class AppointmentManagementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Appointment::class);
+
         $data = $request->validate([
             'patient_name'     => ['required', 'string', 'max:100'],
             'patient_phone'    => ['required', 'string', 'max:25'],
@@ -136,6 +145,7 @@ class AppointmentManagementController extends Controller
         ]);
 
         $appointment = Appointment::findOrFail($id);
+        Gate::authorize('update', $appointment);
         $newStatus   = $data['status'];
 
         $updates = ['status' => $newStatus];
@@ -173,7 +183,9 @@ class AppointmentManagementController extends Controller
             'admin_notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        Appointment::findOrFail($id)->update($data);
+        $appointment = Appointment::findOrFail($id);
+        Gate::authorize('update', $appointment);
+        $appointment->update($data);
 
         return response()->json(['success' => true]);
     }
@@ -203,6 +215,8 @@ class AppointmentManagementController extends Controller
 
     public function calendar(Request $request): View
     {
+        Gate::authorize('viewAny', Appointment::class);
+
         $month = $request->input('month', today()->format('Y-m'));
         [$year, $mon] = explode('-', $month . '-01');
 
