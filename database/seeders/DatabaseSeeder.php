@@ -32,7 +32,7 @@ class AdminUserSeeder extends Seeder
         DB::table('users')->updateOrInsert(
             ['email' => 'admin@solyclinic.com'],
             [
-                'name'              => 'Dr. Salim',
+                'name'              => 'Dr. Selim',
                 'email'             => 'admin@solyclinic.com',
                 'password'          => Hash::make('Admin@2024'),
                 'role'              => 'superadmin',
