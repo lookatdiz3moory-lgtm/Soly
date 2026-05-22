@@ -34,15 +34,11 @@
                aria-label="{{ $doctor->name }}">
 
                 {{-- Photo / avatar --}}
-                <div style="background:rgba(201,168,76,.08);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden">
-                    @if($doctor->photo)
-                    <img src="{{ $doctor->photo_url }}" alt="{{ $doctor->name }}"
-                         style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                    @else
-                    <div style="font-size:72px;font-weight:800;color:var(--gold-dark);opacity:.4">
-                        {{ mb_strtoupper(mb_substr($doctor->name, 0, 1)) }}
-                    </div>
-                    @endif
+                <div style="background:rgba(201,168,76,.08);aspect-ratio:4/3;overflow:hidden">
+                    <img src="{{ $doctor->photo_url }}"
+                         alt="{{ $doctor->name }}"
+                         style="width:100%;height:100%;object-fit:cover;display:block"
+                         loading="lazy">
                 </div>
 
                 <div style="padding:var(--sp-5) var(--sp-6) var(--sp-6)">

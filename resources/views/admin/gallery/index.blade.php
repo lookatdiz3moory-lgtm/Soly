@@ -105,14 +105,14 @@
                 @if($item->before_image || $item->after_image)
                 <div style="display:grid;grid-template-columns:1fr 1fr;height:100%">
                     <img src="{{ $item->before_image_url }}" alt="Before"
-                         style="width:100%;height:100%;object-fit:cover">
+                         style="width:100%;height:100%;object-fit:cover" loading="lazy">
                     <img src="{{ $item->after_image_url }}" alt="After"
-                         style="width:100%;height:100%;object-fit:cover;border-left:2px solid #fff">
+                         style="width:100%;height:100%;object-fit:cover;border-left:2px solid #fff" loading="lazy">
                 </div>
                 @endif
             @elseif($item->image)
                 <img src="{{ $item->image_url }}" alt="{{ $item->title ?? 'Gallery item' }}"
-                     style="width:100%;height:100%;object-fit:cover">
+                     style="width:100%;height:100%;object-fit:cover" loading="lazy">
             @else
                 <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--adm-text-muted);font-size:32px" aria-hidden="true">🖼️</div>
             @endif

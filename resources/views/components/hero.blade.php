@@ -8,6 +8,7 @@
 
   {{-- Layered background --}}
   <div class="hero__bg" aria-hidden="true">
+    <div class="hero__bg-photo"></div>
     <div class="hero__bg-gradient"></div>
     <div class="hero__bg-grid"></div>
     <div class="hero__bg-orb hero__bg-orb--1"></div>

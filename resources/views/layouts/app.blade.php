@@ -16,13 +16,27 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
-    {{-- Open Graph --}}
+    {{-- Open Graph
+         NOTE: og:image requires a raster format (JPEG/PNG) — SVG is NOT rendered
+         by Facebook, Twitter, or LinkedIn scrapers. Replace og-cover.svg with a
+         real 1200×630 JPEG at public/images/og-cover.jpg and update the asset()
+         call below to 'images/og-cover.jpg'.
+    --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('og_title', 'Soly Clinic — Premier Dental Care')">
     <meta property="og:description" content="@yield('og_description', 'Premium dental care in Zahraa Maadi, Cairo.')">
     <meta property="og:image" content="@yield('og_image', asset('images/og-cover.svg'))">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="Soly Clinic">
+
+    {{-- Twitter / X Card --}}
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('og_title', 'Soly Clinic — Premier Dental Care')">
+    <meta name="twitter:description" content="@yield('og_description', 'Premium dental care in Zahraa Maadi, Cairo.')">
+    <meta name="twitter:image" content="@yield('og_image', asset('images/og-cover.svg'))">
 
     {{-- Schema.org Local Business --}}
     <script type="application/ld+json">

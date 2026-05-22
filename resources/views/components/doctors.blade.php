@@ -62,15 +62,14 @@
         <div class="doctor-card__photo-wrap">
           @if($photoUrl)
             <img src="{{ $photoUrl }}" alt="Photo of {{ $name }}"
-                 class="doctor-card__photo" loading="lazy" itemprop="image">
+                 class="doctor-card__photo" loading="lazy" itemprop="image"
+                 width="400" height="300">
           @else
-            <div class="doctor-card__photo-placeholder" aria-hidden="true">
-              <svg width="72" height="72" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width=".8">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
+            <img src="{{ asset('images/doctor-placeholder.svg') }}"
+                 alt="Doctor photo coming soon"
+                 class="doctor-card__photo doctor-card__photo--placeholder"
+                 loading="lazy" aria-hidden="true"
+                 width="400" height="300">
           @endif
 
           @if($feat)

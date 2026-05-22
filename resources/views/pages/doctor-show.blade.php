@@ -78,15 +78,10 @@
             <div style="position:sticky;top:calc(var(--nav-h, 72px) + var(--sp-6))">
 
                 {{-- Photo --}}
-                <div style="border-radius:12px;overflow:hidden;margin-bottom:var(--sp-6);background:rgba(201,168,76,.08);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center">
-                    @if($doctor->photo)
-                    <img src="{{ $doctor->photo_url }}" alt="{{ $doctor->name }}"
-                         style="width:100%;height:100%;object-fit:cover">
-                    @else
-                    <div style="font-size:96px;font-weight:800;color:var(--gold-dark);opacity:.3">
-                        {{ mb_strtoupper(mb_substr($doctor->name, 0, 1)) }}
-                    </div>
-                    @endif
+                <div style="border-radius:12px;overflow:hidden;margin-bottom:var(--sp-6);background:rgba(201,168,76,.08);aspect-ratio:3/4">
+                    <img src="{{ $doctor->photo_url }}"
+                         alt="{{ $doctor->name }}"
+                         style="width:100%;height:100%;object-fit:cover;display:block">
                 </div>
 
                 {{-- Quick facts --}}

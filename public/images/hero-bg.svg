@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+  <!-- Deep navy base -->
+  <rect width="1920" height="1080" fill="#0D1B2A"/>
+
+  <!-- Radial gold atmosphere top-right -->
+  <radialGradient id="atm1" cx="72%" cy="38%" r="42%">
+    <stop offset="0%" stop-color="#C9A84C" stop-opacity="0.09"/>
+    <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1920" height="1080" fill="url(#atm1)"/>
+
+  <!-- Radial blue-navy atmosphere bottom-left -->
+  <radialGradient id="atm2" cx="12%" cy="85%" r="38%">
+    <stop offset="0%" stop-color="#2C4A63" stop-opacity="0.45"/>
+    <stop offset="100%" stop-color="#2C4A63" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1920" height="1080" fill="url(#atm2)"/>
+
+  <!-- Subtle diagonal gradient overlay -->
+  <linearGradient id="diag" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" stop-color="#0D1B2A" stop-opacity="0.6"/>
+    <stop offset="55%" stop-color="#1A2E42" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0D1B2A" stop-opacity="0.3"/>
+  </linearGradient>
+  <rect width="1920" height="1080" fill="url(#diag)"/>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+    <path d="M 64 0 L 0 0 0 64" fill="none" stroke="rgba(255,255,255,0.022)" stroke-width="1"/>
+  </pattern>
+  <rect width="1920" height="1080" fill="url(#grid)" opacity="0.6"/>
+
+  <!-- Decorative circles (bokeh-like) -->
+  <circle cx="1620" cy="180" r="220" fill="#C9A84C" fill-opacity="0.03"/>
+  <circle cx="1720" cy="320" r="120" fill="#C9A84C" fill-opacity="0.04"/>
+  <circle cx="80"   cy="900" r="260" fill="#2C4A63" fill-opacity="0.28"/>
+  <circle cx="900"  cy="480" r="160" fill="#C9A84C" fill-opacity="0.025"/>
+
+  <!-- Abstract tooth silhouette (large, ghosted) top-right -->
+  <g transform="translate(1480, 60) scale(4.5)" opacity="0.03">
+    <path d="M11 10h12M9 14c0 0 1.2 2.4 2.5 3.5S14.5 19 17 19s3.8-.8 5-2 2.5-3.5 2.5-3.5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M13.5 19v5a1.5 1.5 0 003 0v-3a1.5 1.5 0 013 0v3a1.5 1.5 0 003 0v-5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!--
+    PRODUCTION REPLACEMENT:
+    Replace this file with a high-quality JPEG photograph of the clinic interior
+    or a professional dental team photo. Recommended: 1920×1080px, < 400KB (WebP preferred).
+    Update the CSS class .hero__bg-photo to reference the real image.
+  -->
+</svg>
