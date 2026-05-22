@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Testimonial;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -53,17 +52,15 @@ class TestimonialManagementController extends Controller
             ->with('success', 'Testimonial added.');
     }
 
-    public function approve(int $id): JsonResponse
+    public function approve(int $id): RedirectResponse
     {
         $item = Testimonial::findOrFail($id);
         Gate::authorize('update', $item);
 
         $item->update(['is_approved' => true, 'is_active' => true]);
 
-        return response()->json([
-            'success'     => true,
-            'is_approved' => true,
-        ]);
+        return redirect()->route('admin.testimonials.index')
+            ->with('success', 'Testimonial approved.');
     }
 
     public function destroy(int $id): RedirectResponse
