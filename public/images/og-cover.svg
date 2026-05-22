@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0B1B33"/>
+  <!-- Gold accent band -->
+  <rect y="0" width="8" height="630" fill="#C9A84C"/>
+  <!-- Tooth icon -->
+  <g transform="translate(540, 200)">
+    <rect width="120" height="120" rx="30" fill="#C9A84C" fill-opacity="0.15"/>
+    <path d="M30 25h60M20 45c0 0 8 18 18 26s16 12 32 12 20-5 30-12 18-26 18-26" stroke="#C9A84C" stroke-width="5" stroke-linecap="round"/>
+    <path d="M38 83v28a8 8 0 0016 0v-16a8 8 0 0116 0v16a8 8 0 0016 0V83" stroke="#C9A84C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- Clinic name -->
+  <text x="600" y="380" font-family="Georgia,serif" font-size="64" fill="#FFFFFF" text-anchor="middle" font-weight="400">Soly Clinic</text>
+  <text x="600" y="430" font-family="system-ui,sans-serif" font-size="22" fill="#C9A84C" text-anchor="middle" letter-spacing="4">PREMIER DENTAL CARE</text>
+  <text x="600" y="480" font-family="system-ui,sans-serif" font-size="16" fill="#8B9BBB" text-anchor="middle">Zahraa Maadi, Cairo</text>
+  <!-- Replace this file with a real 1200×630 JPEG for production -->
+</svg>

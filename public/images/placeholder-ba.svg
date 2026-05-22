@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="500" viewBox="0 0 600 500" fill="none">
+  <rect width="600" height="500" fill="#F0EDE8"/>
+  <!-- Before side -->
+  <rect x="40" y="80" width="230" height="280" rx="8" fill="#DDD8D0"/>
+  <text x="155" y="240" font-family="system-ui,sans-serif" font-size="16" fill="#8B8078" text-anchor="middle">Before</text>
+  <!-- After side -->
+  <rect x="330" y="80" width="230" height="280" rx="8" fill="#E8F0E0"/>
+  <text x="445" y="240" font-family="system-ui,sans-serif" font-size="16" fill="#6B8060" text-anchor="middle">After</text>
+  <!-- Arrow -->
+  <path d="M285 220 L315 220 M305 210 L315 220 L305 230" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="300" y="430" font-family="system-ui,sans-serif" font-size="13" fill="#9B8B72" text-anchor="middle" opacity="0.7">Before / After Photo</text>
+</svg>

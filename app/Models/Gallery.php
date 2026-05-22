@@ -87,20 +87,20 @@ class Gallery extends Model
     {
         return $this->before_image
             ? asset('storage/' . $this->before_image)
-            : asset('images/placeholder-ba.jpg');
+            : asset('images/placeholder-ba.svg');
     }
 
     public function getAfterImageUrlAttribute(): string
     {
         return $this->after_image
             ? asset('storage/' . $this->after_image)
-            : asset('images/placeholder-ba.jpg');
+            : asset('images/placeholder-ba.svg');
     }
 
     public function getImageUrlAttribute(): string
     {
         return $this->image
             ? asset('storage/' . $this->image)
-            : asset('images/placeholder.jpg');
+            : asset('images/placeholder.svg');
     }
 }

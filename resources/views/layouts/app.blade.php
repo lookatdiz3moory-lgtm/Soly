@@ -12,12 +12,16 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
     {{-- Open Graph --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('og_title', 'Soly Clinic — Premier Dental Care')">
     <meta property="og:description" content="@yield('og_description', 'Premium dental care in Zahraa Maadi, Cairo.')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-cover.jpg'))">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-cover.svg'))">
     <meta name="twitter:card" content="summary_large_image">
 
     {{-- Schema.org Local Business --}}
@@ -39,7 +43,7 @@
             { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday","Sunday"], "opens": "10:00", "closes": "18:00" }
         ],
         "priceRange": "$$",
-        "image": "{{ asset('images/og-cover.jpg') }}"
+        "image": "{{ asset('images/og-cover.svg') }}"
     }
     </script>
 

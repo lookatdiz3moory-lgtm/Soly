@@ -117,7 +117,7 @@ class Offer extends Model
     {
         return $this->image
             ? asset('storage/' . $this->image)
-            : asset('images/offer-placeholder.jpg');
+            : asset('images/offer-placeholder.svg');
     }
 
     /**

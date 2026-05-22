@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" fill="#FDF8EE"/>
+  <rect x="220" y="120" width="160" height="120" rx="12" fill="#F0E6CC"/>
+  <path d="M270 160 L300 140 L330 160 L318 190 L282 190 Z" fill="#C9A84C" opacity="0.6"/>
+  <rect x="260" y="200" width="80" height="24" rx="4" fill="#C9A84C" opacity="0.3"/>
+  <text x="300" y="310" font-family="system-ui,sans-serif" font-size="14" fill="#9B8B72" text-anchor="middle" opacity="0.7">Offer Image</text>
+</svg>

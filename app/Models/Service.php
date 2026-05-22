@@ -165,7 +165,7 @@ class Service extends Model
     {
         return $this->image
             ? asset('storage/' . $this->image)
-            : asset('images/service-placeholder.jpg');
+            : asset('images/service-placeholder.svg');
     }
 
     /**

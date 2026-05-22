@@ -70,14 +70,14 @@
         <div class="ba-item" data-animate="fade-up" data-delay="{{ ($i % 2) * 100 }}">
           <div class="ba-images">
             <div class="ba-image">
-              <img data-src="{{ $item->before_image_url ?? asset('images/placeholder-ba.jpg') }}"
-                   src="{{ asset('images/placeholder-1x1.jpg') }}"
+              <img data-src="{{ $item->before_image_url ?? asset('images/placeholder-ba.svg') }}"
+                   src="{{ asset('images/placeholder-1x1.svg') }}"
                    alt="Before {{ $item->treatment ?? '' }}" loading="lazy">
               <div class="ba-label">Before</div>
             </div>
             <div class="ba-image">
-              <img data-src="{{ $item->after_image_url ?? asset('images/placeholder-ba.jpg') }}"
-                   src="{{ asset('images/placeholder-1x1.jpg') }}"
+              <img data-src="{{ $item->after_image_url ?? asset('images/placeholder-ba.svg') }}"
+                   src="{{ asset('images/placeholder-1x1.svg') }}"
                    alt="After {{ $item->treatment ?? '' }}" loading="lazy">
               <div class="ba-label">After</div>
             </div>
