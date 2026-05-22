@@ -23,7 +23,8 @@ class ServiceController extends Controller
 
     public function show(string $slug): View
     {
-        $service = Service::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $service = Service::with(['doctors' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->where('slug', $slug)->where('is_active', true)->firstOrFail();
 
         return view()->exists('pages.service-show')
             ? view('pages.service-show', compact('service'))

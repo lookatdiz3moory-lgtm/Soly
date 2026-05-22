@@ -103,7 +103,7 @@ class SettingController extends Controller
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        $user->update(['password' => Hash::make($data['password'])]);
+        $user->update(['password' => $data['password']]); // 'hashed' cast auto-applies Hash::make()
 
         return redirect()->route('admin.settings.profile')
             ->with('success', 'Password changed successfully.');

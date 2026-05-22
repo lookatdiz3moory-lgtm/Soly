@@ -66,13 +66,17 @@
 
     <div class="adm-stat-card adm-stat-card--green" data-icon="✅">
         <div class="adm-stat-card__icon adm-stat-card__icon--green" aria-hidden="true">✅</div>
-        <div class="adm-stat-card__value" data-count-to="{{ $stats['completed'] }}">0</div>
+        <div class="adm-stat-card__value"
+             id="stat-completed"
+             data-count-to="{{ $stats['completed'] }}">0</div>
         <div class="adm-stat-card__label">Completed</div>
     </div>
 
     <div class="adm-stat-card adm-stat-card--purple" data-icon="👥">
         <div class="adm-stat-card__icon adm-stat-card__icon--purple" aria-hidden="true">👥</div>
-        <div class="adm-stat-card__value" data-count-to="{{ $stats['total_patients'] }}">0</div>
+        <div class="adm-stat-card__value"
+             id="stat-patients"
+             data-count-to="{{ $stats['total_patients'] }}">0</div>
         <div class="adm-stat-card__label">Registered Patients</div>
         @if($stats['new_patients_month'] > 0)
         <div class="adm-stat-card__change adm-stat-card__change--up">
@@ -92,7 +96,9 @@
 
     <div class="adm-stat-card adm-stat-card--red" data-icon="❌">
         <div class="adm-stat-card__icon adm-stat-card__icon--red" aria-hidden="true">❌</div>
-        <div class="adm-stat-card__value" data-count-to="{{ $stats['cancelled'] }}">0</div>
+        <div class="adm-stat-card__value"
+             id="stat-cancelled"
+             data-count-to="{{ $stats['cancelled'] }}">0</div>
         <div class="adm-stat-card__label">Cancelled</div>
     </div>
 

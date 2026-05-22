@@ -15,7 +15,7 @@ class DoctorManagementController extends Controller
     public function index(): View
     {
         Gate::authorize('viewAny', Doctor::class);
-        $doctors = Doctor::orderBy('sort_order')->orderBy('name')->get();
+        $doctors = Doctor::with('services:id,name')->orderBy('sort_order')->orderBy('name')->get();
         return $this->render('admin.doctors.index', 'Doctors', compact('doctors'), $doctors->count() . ' doctors');
     }
 
@@ -81,10 +81,15 @@ class DoctorManagementController extends Controller
         $doctor = Doctor::findOrFail($id);
         Gate::authorize('update', $doctor);
 
-        $schedule = $request->input('schedule', []);
-        if (is_string($schedule)) {
-            $decoded = json_decode($schedule, true);
-            $schedule = is_array($decoded) ? $decoded : [];
+        // Form submits per-day flat inputs (monday_active, monday_open, monday_close, …)
+        $days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+        $schedule = [];
+        foreach ($days as $day) {
+            $schedule[$day] = [
+                'active' => $request->boolean("{$day}_active"),
+                'open'   => $request->input("{$day}_open", '09:00'),
+                'close'  => $request->input("{$day}_close", '21:00'),
+            ];
         }
 
         $doctor->update(['schedule' => $schedule]);

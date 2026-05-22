@@ -28,7 +28,7 @@ $defaults = [
 ];
 @endphp
 
-<form method="POST" action="{{ route('admin.doctors.updateSchedule', $doctor->id) }}" id="scheduleForm">
+<form method="POST" action="{{ route('admin.doctors.schedule.update', $doctor->id) }}" id="scheduleForm">
 @csrf @method('PUT')
 
 <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start">

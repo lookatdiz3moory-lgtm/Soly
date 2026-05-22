@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -69,16 +68,14 @@ class GalleryManagementController extends Controller
             ->with('success', 'Gallery item removed.');
     }
 
-    public function toggle(int $id): JsonResponse
+    public function toggle(int $id): RedirectResponse
     {
         $item = Gallery::findOrFail($id);
         Gate::authorize('update', $item);
 
         $item->update(['is_active' => !$item->is_active]);
 
-        return response()->json([
-            'success'   => true,
-            'is_active' => $item->is_active,
-        ]);
+        return redirect()->route('admin.gallery.index')
+            ->with('success', $item->is_active ? 'Item published.' : 'Item hidden.');
     }
 }

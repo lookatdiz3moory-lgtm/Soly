@@ -18,7 +18,7 @@
         @endisset
 
         <p style="margin-top: 1.5rem;">
-            <a href="{{ route('admin.dashboard') }}" class="btn">← Back to Dashboard</a>
+            <a href="{{ route('admin.dashboard') }}" class="adm-btn adm-btn--outline">← Back to Dashboard</a>
         </p>
     </div>
 </div>
