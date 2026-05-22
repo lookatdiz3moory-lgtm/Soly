@@ -31,16 +31,17 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.45;
+  opacity: 0.65;
 }
 
 .hero__bg-gradient {
   position: absolute;
   inset: 0;
+  /* rgba base keeps the dark navy mood while letting the photo bleed through */
   background:
-    radial-gradient(ellipse 70% 60% at 68% 50%,  rgba(201,168,76,.07)  0%, transparent 65%),
-    radial-gradient(ellipse 45% 55% at 8%  80%,  rgba(44, 74, 99, .35) 0%, transparent 60%),
-    linear-gradient(160deg, #0D1B2A 0%, #1A2E42 55%, #0D1B2A 100%);
+    radial-gradient(ellipse 70% 60% at 68% 50%,  rgba(201,168,76,.08)  0%, transparent 65%),
+    radial-gradient(ellipse 45% 55% at 8%  80%,  rgba(44, 74, 99, .30) 0%, transparent 60%),
+    linear-gradient(160deg, rgba(13,27,42,.72) 0%, rgba(26,46,66,.60) 55%, rgba(13,27,42,.72) 100%);
 }
 .hero__bg-grid {
   position: absolute;
