@@ -9,7 +9,7 @@ class OfferController extends Controller
 {
     public function index(): View
     {
-        $offers = Offer::active()->orderByDesc('is_featured')->orderBy('sort_order')->get();
+        $offers = Offer::with('service:id,name,slug')->active()->orderByDesc('is_featured')->orderBy('sort_order')->get();
 
         return view()->exists('pages.offers')
             ? view('pages.offers', compact('offers'))
@@ -25,8 +25,10 @@ class OfferController extends Controller
     {
         $offer = Offer::with('service:id,name,slug')
             ->where('is_active', true)
-            ->whereRaw('LOWER(title) = ?', [strtolower(str_replace('-', ' ', $slug))])
-            ->orWhere('id', is_numeric($slug) ? (int)$slug : 0)
+            ->where(function ($q) use ($slug): void {
+                $q->whereRaw('LOWER(title) = ?', [strtolower(str_replace('-', ' ', $slug))])
+                  ->orWhere('id', is_numeric($slug) ? (int)$slug : 0);
+            })
             ->firstOrFail();
 
         return view()->exists('pages.offer-show')
