@@ -52,7 +52,8 @@ class AppointmentManagementController extends Controller
         }
 
         if ($request->filled('search')) {
-            $term = '%' . $request->input('search') . '%';
+            $escaped = addcslashes($request->input('search'), '%_\\');
+            $term    = '%' . $escaped . '%';
             $query->where(function ($q) use ($term) {
                 $q->where('patient_name',  'like', $term)
                   ->orWhere('patient_phone','like', $term)

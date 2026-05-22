@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('admin.settings.updateProfile') }}" novalidate>
+            <form method="POST" action="{{ route('admin.settings.profile.update') }}" novalidate>
             @csrf @method('PUT')
 
                 <div class="adm-form-group">
@@ -74,7 +74,7 @@
         </div>
         <div class="adm-card__body">
 
-            <form method="POST" action="{{ route('admin.settings.changePassword') }}" novalidate>
+            <form method="POST" action="{{ route('admin.settings.password') }}" novalidate>
             @csrf @method('PUT')
 
                 <div class="adm-form-group">

@@ -314,7 +314,13 @@ function showToast(message, type = 'info', duration = 4000) {
     }
     const toast = document.createElement('div');
     toast.className = `flash flash--${type}`;
-    toast.innerHTML = `<span>${message}</span><button class="flash__close" onclick="this.parentElement.remove()">×</button>`;
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'flash__close';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => toast.remove();
+    toast.append(msgSpan, closeBtn);
     container.appendChild(toast);
     setTimeout(() => {
         toast.style.transition = 'opacity 0.35s, transform 0.35s';

@@ -124,7 +124,7 @@ class BookingApiController extends Controller
 
         $doctor  = Doctor::active()->find((int)$validated['doctor_id']);
         if (!$doctor) {
-            return $this->error('Doctor not found.', 404);
+            return $this->error('Doctor not found.', [], 404);
         }
 
         $slotEnd = date('H:i', strtotime($validated['slot_start']) + (($doctor->slot_duration ?? 30) * 60));
@@ -175,7 +175,7 @@ class BookingApiController extends Controller
                 'name'     => $data['patient_name'],
                 'phone'    => $phone,
                 'email'    => $email ?? $phone . '@patient.local',
-                'password' => bcrypt(bin2hex(random_bytes(16))), // random, not for login
+                'password' => bin2hex(random_bytes(16)), // random non-login token; cast hashes it
                 'role'     => User::ROLE_PATIENT,
                 'is_active'=> true,
             ]);

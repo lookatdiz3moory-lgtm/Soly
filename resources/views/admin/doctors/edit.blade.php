@@ -65,6 +65,24 @@
 
                 <div class="adm-form-grid">
                     <div class="adm-form-group">
+                        <label class="adm-form-label" for="specialties">Areas of Expertise</label>
+                        <input type="text" id="specialties" name="specialties" class="adm-form-control @error('specialties') adm-form-control--error @enderror"
+                               value="{{ old('specialties', is_array($doctor->specialties) ? implode(', ', $doctor->specialties) : '') }}" maxlength="500" placeholder="Implants, Veneers, Orthodontics">
+                        <span class="adm-form-hint">Comma-separated list.</span>
+                        @error('specialties')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="adm-form-group">
+                        <label class="adm-form-label" for="languages">Languages</label>
+                        <input type="text" id="languages" name="languages" class="adm-form-control @error('languages') adm-form-control--error @enderror"
+                               value="{{ old('languages', is_array($doctor->languages) ? implode(', ', $doctor->languages) : '') }}" maxlength="200" placeholder="Arabic, English">
+                        <span class="adm-form-hint">Comma-separated list.</span>
+                        @error('languages')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
+                <div class="adm-form-grid">
+                    <div class="adm-form-group">
                         <label class="adm-form-label" for="phone">Phone</label>
                         <input type="tel" id="phone" name="phone" class="adm-form-control @error('phone') adm-form-control--error @enderror"
                                value="{{ old('phone', $doctor->phone) }}" maxlength="25">

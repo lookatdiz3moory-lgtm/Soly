@@ -97,7 +97,7 @@ class DoctorManagementController extends Controller
 
     private function validateDoctor(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name'           => ['required', 'string', 'max:120'],
             'title'          => ['nullable', 'string', 'max:80'],
             'specialty'      => ['nullable', 'string', 'max:120'],
@@ -108,7 +108,20 @@ class DoctorManagementController extends Controller
             'slot_duration'  => ['nullable', 'integer', 'min:5', 'max:240'],
             'is_active'      => ['nullable', 'boolean'],
             'sort_order'     => ['nullable', 'integer', 'min:0'],
+            'specialties'    => ['nullable', 'array'],
+            'specialties.*'  => ['string', 'max:100'],
+            'languages'      => ['nullable', 'array'],
+            'languages.*'    => ['string', 'max:80'],
         ]);
+
+        // Convert comma-separated textarea inputs to arrays if submitted as strings
+        foreach (['specialties', 'languages'] as $field) {
+            if (isset($data[$field]) && is_string($data[$field])) {
+                $data[$field] = array_filter(array_map('trim', explode(',', $data[$field])));
+            }
+        }
+
+        return $data;
     }
 
     private function render(string $view, string $title, array $data = [], ?string $records = null): View

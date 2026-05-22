@@ -93,7 +93,7 @@
     <x-footer />
 
     {{-- Floating WhatsApp --}}
-    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp', '201000000000')) }}?text={{ urlencode('Hello! I would like to book an appointment at Soly Clinic.') }}"
+    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp', '201000000000')) }}?text={{ rawurlencode('Hello! I would like to book an appointment at Soly Clinic.') }}"
        target="_blank"
        rel="noopener noreferrer"
        class="whatsapp-float"

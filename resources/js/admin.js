@@ -47,13 +47,16 @@ function initSidebar() {
   on(overlay,   'click', close);
   on(document,  'keydown', e => { if (e.key === 'Escape') close(); });
 
-  /* Mark active nav item by comparing pathname */
+  /* Mark active nav item by comparing pathname.
+     Require at least one non-slash character after href to avoid /admin matching everything. */
   const path = window.location.pathname;
   qsa('.adm-nav-item', sidebar).forEach(link => {
     const href = link.getAttribute('href') || '';
-    if (href && href !== '#' && path.startsWith(href)) {
-      link.classList.add('is-active');
-    }
+    if (!href || href === '#') return;
+    // Exact match OR href is a proper prefix (followed by / or end-of-string)
+    const isExact  = path === href;
+    const isPrefix = path.startsWith(href + '/') || path.startsWith(href + '?');
+    if (isExact || isPrefix) link.classList.add('is-active');
   });
 }
 
@@ -233,9 +236,13 @@ function initStatCounters() {
 function initStatsRefresh() {
   const map = {
     'stat-total':    'total_appointments',
-    'stat-today':    'today_count',
+    'stat-today':    'today_upcoming',
     'stat-pending':  'pending',
     'stat-month':    'month_count',
+    'stat-confirmed':'confirmed',
+    'stat-completed':'completed',
+    'stat-cancelled':'cancelled',
+    'stat-patients': 'total_patients',
   };
 
   async function refresh() {
