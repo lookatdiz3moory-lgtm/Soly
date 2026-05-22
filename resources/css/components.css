@@ -28,9 +28,9 @@
 .hero__bg-photo {
   position: absolute;
   inset: 0;
-  background-image: url('/images/hero-bg.jpg');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   opacity: 0.45;
 }
 
@@ -1055,8 +1055,7 @@
    ──────────────────────────────────────────────────────────────── */
 
 /* Section header light variant */
-.section-header--light      { }
-.section-header--light .section-title  { color: var(--white); }
+.section-header--light .section-title    { color: var(--white); }
 .section-header--light .section-subtitle { color: rgba(255,255,255,.55); }
 
 /* Data-animate (reveal on scroll) — extended from app.css */

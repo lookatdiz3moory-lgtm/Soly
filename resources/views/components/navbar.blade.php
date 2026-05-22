@@ -45,15 +45,11 @@
 
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="navbar__logo" aria-label="Soly Clinic — Home">
-                <img src="{{ asset('images/logo.png') }}"
+                <img src="{{ asset('images/logo-dark.svg') }}"
                      alt="Soly Clinic"
                      class="navbar__logo-img"
-                     width="44" height="44"
+                     width="160" height="38"
                      loading="eager">
-                <div class="navbar__logo-text">
-                    <span class="navbar__logo-name">Soly Clinic</span>
-                    <span class="navbar__logo-tagline">Premium Dental Care</span>
-                </div>
             </a>
 
             {{-- Desktop Navigation --}}
