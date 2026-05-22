@@ -49,7 +49,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {{-- Vite Assets --}}
-    @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/js/app.js', 'resources/js/components.js'])
+    @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/js/app.js'])
 
     {{-- Page-specific head content --}}
     @stack('head')

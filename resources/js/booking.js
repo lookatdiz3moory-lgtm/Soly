@@ -96,8 +96,8 @@ function setStep(form, step) {
     panel.classList.toggle('is-active', i + 1 === step);
   });
 
-  /* Update progress circles */
-  qsa('.booking-step', form).forEach((el, i) => {
+  /* Update progress circles — .booking-step elements are siblings of form, not descendants */
+  qsa('.booking-step', form.closest('.booking-card') ?? document).forEach((el, i) => {
     el.classList.toggle('is-active', i + 1 === step);
     el.classList.toggle('is-done',   i + 1 <  step);
   });
@@ -172,12 +172,6 @@ function validateStep3(form) {
     showError(emailEl, 'Please enter a valid email address.');
     ok = false;
   }
-
-  if (!qs('#agree_terms', form)?.checked) {
-    showGroupError(qs('.booking-terms', form), 'You must agree to the terms to continue.');
-    ok = false;
-  }
-
   return ok;
 }
 
