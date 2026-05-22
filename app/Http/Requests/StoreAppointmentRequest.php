@@ -38,6 +38,9 @@ class StoreAppointmentRequest extends FormRequest
 
             // Optional
             'notes' => ['nullable', 'string', 'max:1000'],
+
+            // Consent
+            'agree_terms' => ['required', 'accepted'],
         ];
     }
 
@@ -58,6 +61,8 @@ class StoreAppointmentRequest extends FormRequest
             'appointment_date.before_or_equal'=> 'Appointments can only be booked up to ' . config('clinic.booking_advance_days', 60) . ' days in advance.',
             'slot_start.required'        => 'Please select a time slot.',
             'slot_start.date_format'     => 'Invalid time format.',
+            'agree_terms.required'       => 'You must agree to the terms to continue.',
+            'agree_terms.accepted'       => 'You must agree to the terms to continue.',
         ];
     }
 

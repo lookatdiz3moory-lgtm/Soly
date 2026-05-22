@@ -30,7 +30,7 @@ function initNavbar() {
 
     /* Scroll behaviour */
     const onScroll = debounce(() => {
-        navbar.classList.toggle('scrolled', window.scrollY > 20);
+        navbar.classList.toggle('is-scrolled', window.scrollY > 40);
     }, 50);
     on(window, 'scroll', onScroll, { passive: true });
     onScroll(); // run once on load
@@ -364,11 +364,29 @@ function initAnchorScrolling() {
 }
 
 
+/* ─── 10. HERO COUNTER ENTRANCE — delayed to follow fade-in ───── */
+function initHeroEntrance() {
+    const hero = $('.hero');
+    if (!hero || !('IntersectionObserver' in window)) return;
+
+    $$('[data-count]', hero).forEach(el => {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                setTimeout(() => animateCounter(entry.target), 400);
+                obs.unobserve(entry.target);
+            });
+        }, { threshold: 0.5 });
+        obs.observe(el);
+    });
+}
+
 /* ─── INIT ALL ────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initRevealAnimations();
     initCounters();
+    initHeroEntrance();
     initCarousel('testimonialCarousel');
     initFaqAccordion();
     initScrollTop();

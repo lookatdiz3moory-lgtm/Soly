@@ -172,6 +172,12 @@ function validateStep3(form) {
     showError(emailEl, 'Please enter a valid email address.');
     ok = false;
   }
+
+  if (!qs('#agree_terms', form)?.checked) {
+    showGroupError(qs('.booking-terms', form), 'You must agree to the terms to continue.');
+    ok = false;
+  }
+
   return ok;
 }
 

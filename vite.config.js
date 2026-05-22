@@ -12,7 +12,6 @@ export default defineConfig({
 
                 'resources/js/app.js',
                 'resources/js/admin.js',
-                'resources/js/components.js',
                 'resources/js/booking.js',
             ],
             refresh: true,
