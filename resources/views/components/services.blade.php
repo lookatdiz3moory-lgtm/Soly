@@ -22,6 +22,18 @@
     ['slug'=>'facial-skincare', 'icon'=>'💆','name'=>'Facial Skin Care', 'short_description'=>'Advanced facial treatments to complement your smile — HydraFacial, PRP, and rejuvenation.',            'price_from'=>400,  'is_featured'=>false],
   ];
 
+  $slugImages = [
+    'teeth-cleaning'    => asset('images/service-cleaning.jpg'),
+    'scaling-polishing' => asset('images/service-cleaning.jpg'),
+    'veneers'           => asset('images/service-veneers.jpg'),
+    'zircon-crowns'     => asset('images/service-veneers.jpg'),
+    'hollywood-smile'   => asset('images/service-whitening.jpg'),
+    'dental-implants'   => asset('images/service-implants.jpg'),
+    'orthodontics'      => asset('images/service-orthodontics.jpg'),
+    'root-canal'        => asset('images/service-root-canal.jpg'),
+    'teeth-whitening'   => asset('images/service-whitening.jpg'),
+  ];
+
   $list = $services && count($services)
     ? array_slice(is_array($services) ? $services : $services->toArray(), 0, $limit)
     : array_slice($defaults, 0, $limit);
@@ -47,12 +59,15 @@
     <div class="services__grid">
       @foreach($list as $i => $svc)
       @php
-        $slug  = is_array($svc) ? $svc['slug']              : $svc->slug;
-        $icon  = is_array($svc) ? ($svc['icon'] ?? '🦷')    : ($svc->icon ?? '🦷');
-        $name  = is_array($svc) ? $svc['name']              : $svc->name;
-        $desc  = is_array($svc) ? $svc['short_description'] : $svc->short_description;
-        $price = is_array($svc) ? ($svc['price_from'] ?? null) : $svc->price_from;
-        $feat  = is_array($svc) ? ($svc['is_featured'] ?? false) : (bool)$svc->is_featured;
+        $slug     = is_array($svc) ? $svc['slug']                : $svc->slug;
+        $icon     = is_array($svc) ? ($svc['icon'] ?? '🦷')      : ($svc->icon ?? '🦷');
+        $name     = is_array($svc) ? $svc['name']                : $svc->name;
+        $desc     = is_array($svc) ? $svc['short_description']   : $svc->short_description;
+        $price    = is_array($svc) ? ($svc['price_from'] ?? null) : $svc->price_from;
+        $feat     = is_array($svc) ? ($svc['is_featured'] ?? false) : (bool)$svc->is_featured;
+        $imageUrl = is_array($svc)
+            ? ($slugImages[$slug] ?? null)
+            : ((!is_array($svc) && $svc->image) ? $svc->image_url : ($slugImages[$slug] ?? null));
       @endphp
 
       <article class="service-card"
@@ -64,9 +79,15 @@
           <div class="service-card__featured-badge" aria-label="Popular service">Popular</div>
         @endif
 
+        @if($imageUrl)
+        <div class="service-card__photo">
+          <img src="{{ $imageUrl }}" alt="{{ $name }}" loading="lazy" width="400" height="168">
+        </div>
+        @else
         <div class="service-card__icon-wrap" aria-hidden="true">
           <span class="service-card__icon">{{ $icon }}</span>
         </div>
+        @endif
 
         <div class="service-card__body">
           <h3 class="service-card__name" itemprop="name">{{ $name }}</h3>

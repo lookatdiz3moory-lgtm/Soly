@@ -163,9 +163,13 @@ class Service extends Model
      */
     public function getImageUrlAttribute(): string
     {
-        return $this->image
-            ? asset('storage/' . $this->image)
-            : asset('images/service-placeholder.svg');
+        if (!$this->image) {
+            return asset('images/service-placeholder.svg');
+        }
+        if (str_starts_with($this->image, 'images/')) {
+            return asset($this->image);
+        }
+        return asset('storage/' . $this->image);
     }
 
     /**

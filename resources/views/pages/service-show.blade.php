@@ -74,7 +74,13 @@
             <div style="position:sticky;top:calc(var(--nav-h, 72px) + var(--sp-6))">
                 <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 24px rgba(11,21,32,.07)">
 
-                    @if($service->icon)
+                    @if($service->image)
+                    <div style="aspect-ratio:16/9;overflow:hidden">
+                        <img src="{{ $service->image_url }}" alt="{{ $service->name }}"
+                             style="width:100%;height:100%;object-fit:cover;display:block"
+                             loading="lazy">
+                    </div>
+                    @elseif($service->icon)
                     <div style="background:rgba(201,168,76,.08);padding:var(--sp-6);text-align:center;font-size:48px">
                         {{ $service->icon }}
                     </div>

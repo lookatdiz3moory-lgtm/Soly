@@ -25,19 +25,13 @@
   z-index: 0;
 }
 
-/*
- * HERO PHOTO LAYER
- * Replace hero-bg.svg with a real clinic/team photo to activate.
- * Drop a 1920×1080 WebP/JPEG at public/images/hero-bg.jpg and
- * change the url() below — the overlay gradient handles readability.
- */
 .hero__bg-photo {
   position: absolute;
   inset: 0;
-  background-image: url('/images/hero-bg.svg');
+  background-image: url('/images/hero-bg.jpg');
   background-size: cover;
   background-position: center;
-  opacity: 0.22; /* Increase toward 0.55 once a real photo is in place */
+  opacity: 0.45;
 }
 
 .hero__bg-gradient {
@@ -491,6 +485,20 @@
 }
 .service-card__wa:hover { background: rgba(37,211,102,.13); }
 .service-card__wa svg   { flex-shrink: 0; }
+
+.service-card__photo {
+  height: 168px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.service-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .45s ease;
+}
+.service-card:hover .service-card__photo img { transform: scale(1.05); }
 
 .services__footer { display: flex; justify-content: center; }
 

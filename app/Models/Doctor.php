@@ -120,9 +120,13 @@ class Doctor extends Model
 
     public function getPhotoUrlAttribute(): string
     {
-        return $this->photo
-            ? asset('storage/' . $this->photo)
-            : asset('images/doctor-placeholder.svg');
+        if (!$this->photo) {
+            return asset('images/doctor-placeholder.svg');
+        }
+        if (str_starts_with($this->photo, 'images/')) {
+            return asset($this->photo);
+        }
+        return asset('storage/' . $this->photo);
     }
 
     /**

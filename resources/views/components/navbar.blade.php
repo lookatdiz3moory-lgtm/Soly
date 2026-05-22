@@ -45,13 +45,11 @@
 
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="navbar__logo" aria-label="Soly Clinic — Home">
-                <div class="navbar__logo-mark" aria-hidden="true">
-                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-                        <rect width="34" height="34" rx="10" fill="#C9A84C" fill-opacity="0.12"/>
-                        <path d="M11 10h12M9 14c0 0 1.2 2.4 2.5 3.5S14.5 19 17 19s3.8-.8 5-2 2.5-3.5 2.5-3.5" stroke="#C9A84C" stroke-width="1.6" stroke-linecap="round"/>
-                        <path d="M13.5 19v5a1.5 1.5 0 003 0v-3a1.5 1.5 0 013 0v3a1.5 1.5 0 003 0v-5" stroke="#C9A84C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
+                <img src="{{ asset('images/logo.png') }}"
+                     alt="Soly Clinic"
+                     class="navbar__logo-img"
+                     width="44" height="44"
+                     loading="eager">
                 <div class="navbar__logo-text">
                     <span class="navbar__logo-name">Soly Clinic</span>
                     <span class="navbar__logo-tagline">Premium Dental Care</span>

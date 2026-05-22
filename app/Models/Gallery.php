@@ -85,22 +85,34 @@ class Gallery extends Model
 
     public function getBeforeImageUrlAttribute(): string
     {
-        return $this->before_image
-            ? asset('storage/' . $this->before_image)
-            : asset('images/placeholder-ba.svg');
+        if (!$this->before_image) {
+            return asset('images/placeholder-ba.svg');
+        }
+        if (str_starts_with($this->before_image, 'images/')) {
+            return asset($this->before_image);
+        }
+        return asset('storage/' . $this->before_image);
     }
 
     public function getAfterImageUrlAttribute(): string
     {
-        return $this->after_image
-            ? asset('storage/' . $this->after_image)
-            : asset('images/placeholder-ba.svg');
+        if (!$this->after_image) {
+            return asset('images/placeholder-ba.svg');
+        }
+        if (str_starts_with($this->after_image, 'images/')) {
+            return asset($this->after_image);
+        }
+        return asset('storage/' . $this->after_image);
     }
 
     public function getImageUrlAttribute(): string
     {
-        return $this->image
-            ? asset('storage/' . $this->image)
-            : asset('images/placeholder.svg');
+        if (!$this->image) {
+            return asset('images/placeholder.svg');
+        }
+        if (str_starts_with($this->image, 'images/')) {
+            return asset($this->image);
+        }
+        return asset('storage/' . $this->image);
     }
 }

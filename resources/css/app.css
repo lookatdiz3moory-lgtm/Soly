@@ -421,6 +421,15 @@ em     { font-style: italic; }
   transition: var(--t);
 }
 .navbar__logo:hover .navbar__logo-mark { opacity: 0.85; }
+.navbar__logo-img {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: var(--t);
+}
+.navbar__logo:hover .navbar__logo-img { opacity: 0.88; }
 .navbar__logo-text { display: flex; flex-direction: column; line-height: 1; }
 .navbar__logo-name {
   font-family: var(--font-serif);
@@ -1309,6 +1318,7 @@ em     { font-style: italic; }
 }
 
 .footer__logo { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-5); text-decoration: none; }
+.footer__logo-img { flex-shrink: 0; width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
 .footer__logo-name { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700; color: var(--white); display: block; }
 .footer__logo-tagline { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gold); }
 .footer__brand-desc { font-size: 13.5px; line-height: 1.72; margin-bottom: var(--sp-6); }
