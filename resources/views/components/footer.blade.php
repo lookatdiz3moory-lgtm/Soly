@@ -11,11 +11,16 @@
             {{-- Brand Column --}}
             <div class="footer__brand">
                 <a href="{{ route('home') }}" class="footer__logo" aria-label="Soly Clinic">
-                    <img src="{{ asset('images/logo-white.svg') }}"
-                         alt="Soly Clinic"
+                    <img src="{{ asset('images/logo.png') }}"
+                         alt=""
                          class="footer__logo-img"
-                         width="160" height="38"
-                         loading="lazy">
+                         width="96" height="64"
+                         loading="lazy"
+                         aria-hidden="true">
+                    <div>
+                        <span class="footer__logo-name">Soly Clinic</span>
+                        <span class="footer__logo-tagline">Premium Dental Care</span>
+                    </div>
                 </a>
                 <p class="footer__brand-desc">
                     Expert dental care in Zahraa Maadi, Cairo. Honest treatment, fair pricing, and results that last — because your smile deserves the best.
