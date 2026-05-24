@@ -103,7 +103,7 @@
         </div>
 
         <div style="margin-top:var(--sp-12);padding-top:var(--sp-8);border-top:1px solid var(--border)">
-            <a href="{{ route('offers.index') }}" style="color:var(--gold-dark);font-weight:600;text-decoration:none;font-size:.9rem">
+            <a href="{{ route('offers') }}" style="color:var(--gold-dark);font-weight:600;text-decoration:none;font-size:.9rem">
                 {{ __('messages.offer_detail.back_offers') }}
             </a>
         </div>

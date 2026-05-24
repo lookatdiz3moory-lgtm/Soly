@@ -102,7 +102,7 @@
                    class="btn btn--primary" style="width:100%;text-align:center;display:block;margin-bottom:var(--sp-3)">
                     {{ __('messages.doctor_detail.book_with') }} {{ Str::before($doctor->localized_name, ' ') }}
                 </a>
-                <a href="{{ route('doctors.index') }}"
+                <a href="{{ route('doctors') }}"
                    class="btn btn--outline" style="width:100%;text-align:center;display:block">
                     {{ __('messages.doctor_detail.back_doctors') }}
                 </a>

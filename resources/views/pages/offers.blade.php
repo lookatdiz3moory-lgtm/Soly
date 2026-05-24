@@ -21,7 +21,7 @@
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">🎁</div>
             <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.offers_page.empty_heading') }}</h2>
             <p style="margin-bottom:var(--sp-8)">{{ __('messages.offers_page.empty_sub') }}</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.offers_page.ask_pricing_btn') }}</a>
+            <a href="{{ route('contact') }}" class="btn btn--primary">{{ __('messages.offers_page.ask_pricing_btn') }}</a>
         </div>
         @else
 
@@ -97,7 +97,7 @@
                 {{ __('messages.offers_page.bottom_text') }}
             </p>
             <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.offers_page.book_btn') }}</a>
-            <a href="{{ route('services.index') }}" class="btn btn--outline" style="margin-inline-start:var(--sp-3)">{{ __('messages.offers_page.all_services_btn') }}</a>
+            <a href="{{ route('services') }}" class="btn btn--outline" style="margin-inline-start:var(--sp-3)">{{ __('messages.offers_page.all_services_btn') }}</a>
         </div>
 
     </div>

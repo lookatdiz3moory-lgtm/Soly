@@ -43,33 +43,24 @@ Route::get('/lang/{locale}', function (string $locale) {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ── Services ─────────────────────────────────────────────────
-Route::prefix('services')->name('services.')->group(function () {
-    Route::get('/',        [ServiceController::class, 'index'])->name('index');
-    Route::get('/{slug}',  [ServiceController::class, 'show'])->name('show')
-         ->where('slug', '[a-z0-9\-]+');
-});
-// Alias: route('services') resolves to services.index
-Route::get('/services', [ServiceController::class, 'index'])->name('services');
+Route::get('/services',        [ServiceController::class, 'index'])->name('services');
+Route::get('/services/{slug}', [ServiceController::class, 'show'])->name('services.show')
+     ->where('slug', '[a-z0-9\-]+');
 
 // ── Doctors ──────────────────────────────────────────────────
-Route::prefix('doctors')->name('doctors.')->group(function () {
-    Route::get('/',       [DoctorController::class, 'index'])->name('index');
-    Route::get('/{id}',   [DoctorController::class, 'show'])->name('show')
-         ->where('id', '[0-9]+');
-});
-Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors');
+Route::get('/doctors',      [DoctorController::class, 'index'])->name('doctors');
+Route::get('/doctors/{id}', [DoctorController::class, 'show'])->name('doctors.show')
+     ->where('id', '[0-9]+');
 
 // ── Booking ──────────────────────────────────────────────────
-Route::prefix('booking')->name('booking.')->group(function () {
-    Route::get('/',                         [BookingController::class, 'index'])->name('index');
-    Route::get('/confirm/{reference}',      [BookingController::class, 'confirm'])->name('confirm')
-         ->where('reference', '[A-Z0-9\-]+');
-    Route::get('/cancel/{reference}',       [BookingController::class, 'cancelForm'])->name('cancel.form')
-         ->where('reference', '[A-Z0-9\-]+');
-    Route::post('/cancel/{reference}',      [BookingController::class, 'cancel'])->name('cancel')
-         ->where('reference', '[A-Z0-9\-]+');
-});
 Route::get('/book',  [BookingController::class, 'index'])->name('booking');
+Route::get('/booking',                         [BookingController::class, 'index'])->name('booking.index');
+Route::get('/booking/confirm/{reference}',     [BookingController::class, 'confirm'])->name('booking.confirm')
+     ->where('reference', '[A-Z0-9\-]+');
+Route::get('/booking/cancel/{reference}',      [BookingController::class, 'cancelForm'])->name('booking.cancel.form')
+     ->where('reference', '[A-Z0-9\-]+');
+Route::post('/booking/cancel/{reference}',     [BookingController::class, 'cancel'])->name('booking.cancel')
+     ->where('reference', '[A-Z0-9\-]+');
 
 // ── Gallery ──────────────────────────────────────────────────
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
@@ -78,21 +69,15 @@ Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials');
 
 // ── Offers ───────────────────────────────────────────────────
-Route::prefix('offers')->name('offers.')->group(function () {
-    Route::get('/',       [OfferController::class, 'index'])->name('index');
-    Route::get('/{slug}', [OfferController::class, 'show'])->name('show');
-});
-Route::get('/offers', [OfferController::class, 'index'])->name('offers');
+Route::get('/offers',        [OfferController::class, 'index'])->name('offers');
+Route::get('/offers/{slug}', [OfferController::class, 'show'])->name('offers.show');
 
 // ── FAQ ──────────────────────────────────────────────────────
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 
 // ── Contact ──────────────────────────────────────────────────
-Route::prefix('contact')->name('contact.')->group(function () {
-    Route::get('/',  [ContactController::class, 'index'])->name('index');
-    Route::post('/', [ContactController::class, 'store'])->name('store');
-});
-Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::get('/contact',  [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // ── Static / Legal ───────────────────────────────────────────
 Route::get('/privacy', function () {

@@ -21,7 +21,7 @@
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">⭐</div>
             <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.testimonials_page.empty_heading') }}</h2>
             <p style="margin-bottom:var(--sp-8)">{{ __('messages.testimonials_page.empty_sub') }}</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
+            <a href="{{ route('contact') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 

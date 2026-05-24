@@ -115,7 +115,7 @@
                         </a>
                         @endif
 
-                        <a href="{{ route('contact.index') }}"
+                        <a href="{{ route('contact') }}"
                            class="btn btn--outline" style="width:100%;text-align:center;display:block">
                             {{ __('messages.service_detail.ask_question') }}
                         </a>
@@ -127,7 +127,7 @@
         </div>
 
         <div style="margin-top:var(--sp-12);padding-top:var(--sp-8);border-top:1px solid var(--border)">
-            <a href="{{ route('services.index') }}" style="color:var(--gold-dark);font-weight:600;text-decoration:none;font-size:.9rem">
+            <a href="{{ route('services') }}" style="color:var(--gold-dark);font-weight:600;text-decoration:none;font-size:.9rem">
                 {{ __('messages.service_detail.back_services') }}
             </a>
         </div>

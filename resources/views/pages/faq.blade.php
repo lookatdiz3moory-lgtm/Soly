@@ -21,7 +21,7 @@
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">❓</div>
             <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.faq_page.empty_heading') }}</h2>
             <p style="margin-bottom:var(--sp-8)">{{ __('messages.faq_page.empty_sub') }}</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
+            <a href="{{ route('contact') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
@@ -62,7 +62,7 @@
             <p style="font-size:.95rem;color:var(--text-mid);margin-bottom:var(--sp-5)">
                 {{ __('messages.faq_page.still_have') }}
             </p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary" style="margin-inline-end:var(--sp-3)">{{ __('messages.faq_page.contact_btn') }}</a>
+            <a href="{{ route('contact') }}" class="btn btn--primary" style="margin-inline-end:var(--sp-3)">{{ __('messages.faq_page.contact_btn') }}</a>
             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}"
                target="_blank" rel="noopener" class="btn btn--outline">
                 {{ __('messages.faq_page.ask_wa_btn') }}
