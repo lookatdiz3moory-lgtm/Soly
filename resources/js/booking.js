@@ -17,6 +17,7 @@ const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content
 /* ── i18n — falls back to English if bookingI18n is not injected ─ */
 const i18n = window.bookingI18n ?? {};
 const t = key => i18n[key] ?? key;
+const isAr = (i18n.locale ?? document.documentElement.lang ?? 'en') === 'ar';
 
 /* ── State ────────────────────────────────────────────────────── */
 const state = {
@@ -221,21 +222,24 @@ async function onServiceChange(form, serviceSelect) {
 }
 
 function renderDoctors(form, container, doctors) {
-  container.innerHTML = doctors.map(d => `
+  container.innerHTML = doctors.map(d => {
+    const dName = isAr && d.name_ar ? d.name_ar : d.name;
+    const dSpec = isAr && d.specialty_ar ? d.specialty_ar : (d.specialty ?? '');
+    return `
     <label class="doctor-option" data-doctor-id="${d.id}">
       <input type="radio" name="doctor_id" value="${d.id}"
              data-duration="${d.slot_duration ?? 30}"
-             data-name="${escHtml(d.name)}">
+             data-name="${escHtml(dName)}">
       <div class="doctor-option__inner">
         <div class="doctor-option__avatar">
           ${d.photo_url
-            ? `<img src="${escHtml(d.photo_url || '')}" alt="${escHtml(d.name)}" loading="lazy">`
-            : `<span>${escHtml(d.name.charAt(0))}</span>`
+            ? `<img src="${escHtml(d.photo_url || '')}" alt="${escHtml(dName)}" loading="lazy">`
+            : `<span>${escHtml(dName.charAt(0))}</span>`
           }
         </div>
         <div>
-          <div class="doctor-option__name">${escHtml(d.name)}</div>
-          <div class="doctor-option__spec">${escHtml(d.specialty ?? '')}</div>
+          <div class="doctor-option__name">${escHtml(dName)}</div>
+          <div class="doctor-option__spec">${escHtml(dSpec)}</div>
         </div>
         <div class="doctor-option__duration">${d.slot_duration ?? 30} min</div>
         <div class="doctor-option__check">
@@ -245,7 +249,8 @@ function renderDoctors(form, container, doctors) {
           </svg>
         </div>
       </div>
-    </label>`).join('');
+    </label>`;
+  }).join('');
 
   qsa('input[name="doctor_id"]', container).forEach(radio => {
     on(radio, 'change', () => {

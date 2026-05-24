@@ -435,6 +435,7 @@
 @push('scripts')
     <script>
     window.bookingI18n = {
+        locale:        "{{ app()->getLocale() }}",
         errorService:  "{{ addslashes(__('messages.booking_page.error_service')) }}",
         errorDoctor:   "{{ addslashes(__('messages.booking_page.error_doctor')) }}",
         errorDate:     "{{ addslashes(__('messages.booking_page.error_date')) }}",

@@ -62,6 +62,12 @@ class ServiceManagementController extends Controller
     {
         $service = Service::findOrFail($id);
         Gate::authorize('delete', $service);
+
+        if ($service->appointments()->exists()) {
+            return redirect()->route('admin.services.index')
+                ->with('error', "Cannot delete \"{$service->name}\" — it has linked appointments. Reassign or cancel those appointments first.");
+        }
+
         $this->deleteUploadedImage($service->image);
         $service->delete();
         return redirect()->route('admin.services.index')

@@ -84,8 +84,10 @@ class AvailabilityController extends Controller
             ->map(fn(Doctor $d) => [
                 'id'            => $d->id,
                 'name'          => $d->name,
-                'title'         => $d->title,
+                'name_ar'       => $d->name_ar,
                 'specialty'     => $d->specialty,
+                'specialty_ar'  => $d->specialty_ar,
+                'title'         => $d->title,
                 'photo_url'     => $d->photo_url,
                 'experience'    => $d->experience,
                 'slot_duration' => $d->slot_duration ?? 30,
