@@ -17,8 +17,9 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Favicon --}}
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
     {{-- Open Graph --}}
     <meta property="og:type" content="website">
@@ -28,7 +29,12 @@
     <meta property="og:image" content="@yield('og_image', asset('images/og-cover.jpg'))">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:locale" content="en_US">
+    <meta property="og:locale" content="{{ $__locale === 'ar' ? 'ar_EG' : 'en_US' }}">
+    @if($__locale === 'ar')
+    <meta property="og:locale:alternate" content="en_US">
+    @else
+    <meta property="og:locale:alternate" content="ar_EG">
+    @endif
     <meta property="og:site_name" content="Soly Clinic">
 
     {{-- Twitter / X Card --}}

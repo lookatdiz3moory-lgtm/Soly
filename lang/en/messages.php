@@ -68,6 +68,33 @@ return [
         'why_title'               => 'Dentistry You Can Actually Trust',
     ],
 
+    'hero' => [
+        'badge'             => 'Now Accepting New Patients',
+        'headline_l1'       => 'Your Smile.',
+        'headline_l2'       => 'Our Passion.',
+        'headline_l3'       => 'Expert Care.',
+        'sub'               => 'Premium dental care in Zahraa Maadi, Cairo. Honest diagnoses, transparent pricing, and results that transform your confidence — because you deserve a dentist who truly cares.',
+        'whatsapp_us'       => 'WhatsApp Us',
+        'stat_patients'     => 'Happy Patients',
+        'stat_experience'   => 'Years Experience',
+        'stat_rating'       => 'Google Rating',
+        'card_title'        => 'Quick Appointment',
+        'card_sub'          => 'Available Today',
+        'card_badge'        => 'Open Now',
+        'card_cta'          => 'Book Free Consultation',
+        'float_no_fees'     => '✓ No Hidden Fees',
+        'float_safe'        => '🔒 Safe & Sterile',
+        'scroll'            => 'Scroll',
+    ],
+
+    'cta' => [
+        'tag'               => 'Book Today',
+        'title_l1'          => 'Ready for Your',
+        'title_l2'          => 'Best Smile?',
+        'sub'               => 'Book online in under 2 minutes. Choose your service, pick a time, and we confirm within the hour. No waiting, no paper forms.',
+        'book_whatsapp'     => 'Book via WhatsApp',
+    ],
+
     'admin' => [
         'english'      => 'English content',
         'arabic'       => 'Arabic content',
