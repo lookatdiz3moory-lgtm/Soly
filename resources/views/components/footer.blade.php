@@ -19,11 +19,11 @@
                          aria-hidden="true">
                     <div>
                         <span class="footer__logo-name">Soly Clinic</span>
-                        <span class="footer__logo-tagline">Premium Dental Care</span>
+                        <span class="footer__logo-tagline">{{ __('messages.nav.tagline') }}</span>
                     </div>
                 </a>
                 <p class="footer__brand-desc">
-                    Expert dental care in Zahraa Maadi, Cairo. Honest treatment, fair pricing, and results that last — because your smile deserves the best.
+                    {{ __('messages.footer.description') }}
                 </p>
                 <div class="footer__social">
                     @if(config('clinic.instagram'))
@@ -55,7 +55,7 @@
 
             {{-- Services Column --}}
             <div class="footer__col">
-                <h3 class="footer__heading">Services</h3>
+                <h3 class="footer__heading">{{ __('messages.footer.services') }}</h3>
                 <ul class="footer__links">
                     @foreach([
                         ['teeth-cleaning', 'Teeth Cleaning'],
@@ -76,22 +76,22 @@
 
             {{-- Clinic Column --}}
             <div class="footer__col">
-                <h3 class="footer__heading">Clinic</h3>
+                <h3 class="footer__heading">{{ __('messages.footer.clinic') }}</h3>
                 <ul class="footer__links">
-                    <li><a href="{{ route('home') }}" class="footer__link">Home</a></li>
-                    <li><a href="{{ route('doctors') }}" class="footer__link">Our Doctors</a></li>
-                    <li><a href="{{ route('gallery') }}" class="footer__link">Gallery</a></li>
-                    <li><a href="{{ route('testimonials') }}" class="footer__link">Patient Reviews</a></li>
-                    <li><a href="{{ route('offers') }}" class="footer__link">Special Offers</a></li>
-                    <li><a href="{{ route('faq') }}" class="footer__link">FAQ</a></li>
-                    <li><a href="{{ route('contact') }}" class="footer__link">Contact Us</a></li>
-                    <li><a href="{{ route('booking') }}" class="footer__link">Book Appointment</a></li>
+                    <li><a href="{{ route('home') }}" class="footer__link">{{ __('messages.nav.home') }}</a></li>
+                    <li><a href="{{ route('doctors') }}" class="footer__link">{{ __('messages.footer.our_doctors') }}</a></li>
+                    <li><a href="{{ route('gallery') }}" class="footer__link">{{ __('messages.nav.gallery') }}</a></li>
+                    <li><a href="{{ route('testimonials') }}" class="footer__link">{{ __('messages.footer.patient_reviews') }}</a></li>
+                    <li><a href="{{ route('offers') }}" class="footer__link">{{ __('messages.footer.special_offers') }}</a></li>
+                    <li><a href="{{ route('faq') }}" class="footer__link">{{ __('messages.footer.faq') }}</a></li>
+                    <li><a href="{{ route('contact') }}" class="footer__link">{{ __('messages.buttons.contact_us') }}</a></li>
+                    <li><a href="{{ route('booking') }}" class="footer__link">{{ __('messages.buttons.book') }}</a></li>
                 </ul>
             </div>
 
             {{-- Contact Column --}}
             <div class="footer__col">
-                <h3 class="footer__heading">Get In Touch</h3>
+                <h3 class="footer__heading">{{ __('messages.footer.get_in_touch') }}</h3>
                 <ul class="footer__contact">
                     <li class="footer__contact-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -120,11 +120,11 @@
                 </ul>
 
                 <div class="footer__hours">
-                    <h4 class="footer__hours-title">Working Hours</h4>
+                    <h4 class="footer__hours-title">{{ __('messages.footer.working_hours') }}</h4>
                     <div class="footer__hours-grid">
-                        <span>Sun – Thu</span><span>9:00 AM – 9:00 PM</span>
-                        <span>Saturday</span><span>10:00 AM – 6:00 PM</span>
-                        <span>Friday</span><span style="color: #ef4444;">Closed</span>
+                        <span>{{ __('messages.footer.sun_thu') }}</span><span>9:00 – 21:00</span>
+                        <span>{{ __('messages.footer.saturday') }}</span><span>10:00 – 18:00</span>
+                        <span>{{ __('messages.footer.friday') }}</span><span style="color: #ef4444;">{{ __('messages.footer.closed') }}</span>
                     </div>
                 </div>
             </div>
@@ -136,12 +136,12 @@
     <div class="footer__bottom">
         <div class="container footer__bottom-inner">
             <p class="footer__copy">
-                &copy; {{ date('Y') }} Soly Clinic. All rights reserved.
+                &copy; {{ date('Y') }} Soly Clinic. {{ __('messages.footer.rights_reserved') }}
             </p>
             <div class="footer__legal">
-                <a href="{{ route('privacy') }}" class="footer__legal-link">Privacy Policy</a>
-                <a href="{{ route('terms') }}" class="footer__legal-link">Terms of Service</a>
-                <a href="{{ route('sitemap') }}" class="footer__legal-link">Sitemap</a>
+                <a href="{{ route('privacy') }}" class="footer__legal-link">{{ __('messages.footer.privacy') }}</a>
+                <a href="{{ route('terms') }}" class="footer__legal-link">{{ __('messages.footer.terms') }}</a>
+                <a href="{{ route('sitemap') }}" class="footer__legal-link">{{ __('messages.footer.sitemap') }}</a>
             </div>
         </div>
     </div>

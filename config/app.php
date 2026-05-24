@@ -86,6 +86,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | Locales the site can switch between via the language switcher. Each
+    | code must have a matching folder under /lang/{code}/. Used by the
+    | SetLocale middleware to validate session('locale') and by the
+    | language-switcher component to render the buttons.
+    |
+    */
+
+    'supported_locales' => ['en', 'ar'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | RTL Locales
+    |--------------------------------------------------------------------------
+    |
+    | Locales whose text direction is right-to-left. Layouts read this list
+    | to set <html dir="rtl"> and load RTL CSS overrides.
+    |
+    */
+
+    'rtl_locales' => ['ar'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

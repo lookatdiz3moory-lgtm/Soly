@@ -63,6 +63,35 @@
                     @error('bio')<span class="adm-form-error">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Arabic translations (optional) --}}
+                <div class="adm-bilingual">
+                    <p class="adm-bilingual__label">{{ __('messages.admin.arabic') }} — {{ __('messages.admin.optional_ar') }}</p>
+
+                    <div class="adm-bilingual__ar adm-form-group">
+                        <label class="adm-form-label" for="name_ar">الاسم (Name AR)</label>
+                        <input type="text" id="name_ar" name="name_ar"
+                               class="adm-form-control @error('name_ar') adm-form-control--error @enderror"
+                               value="{{ old('name_ar') }}" maxlength="120" placeholder="د. الاسم الكامل">
+                        @error('name_ar')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="adm-bilingual__ar adm-form-group">
+                        <label class="adm-form-label" for="specialty_ar">التخصص (Specialty AR)</label>
+                        <input type="text" id="specialty_ar" name="specialty_ar"
+                               class="adm-form-control @error('specialty_ar') adm-form-control--error @enderror"
+                               value="{{ old('specialty_ar') }}" maxlength="120" placeholder="زراعة وجراحة فم">
+                        @error('specialty_ar')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="adm-bilingual__ar adm-form-group" style="grid-column:1/-1">
+                        <label class="adm-form-label" for="bio_ar">السيرة (Bio AR)</label>
+                        <textarea id="bio_ar" name="bio_ar"
+                                  class="adm-form-control @error('bio_ar') adm-form-control--error @enderror"
+                                  rows="5" maxlength="5000" placeholder="نبذة مهنية مختصرة تظهر في صفحة الطبيب…">{{ old('bio_ar') }}</textarea>
+                        @error('bio_ar')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
                 <div class="adm-form-grid">
                     <div class="adm-form-group">
                         <label class="adm-form-label" for="specialties">Areas of Expertise</label>

@@ -31,25 +31,25 @@
             @foreach($doctors as $doctor)
             <a href="{{ route('doctors.show', $doctor->id) }}"
                style="display:block;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;transition:box-shadow .2s,transform .2s;box-shadow:0 2px 12px rgba(11,21,32,.06)"
-               aria-label="{{ $doctor->name }}">
+               aria-label="{{ $doctor->localized_name }}">
 
                 {{-- Photo / avatar --}}
                 <div style="background:rgba(201,168,76,.08);aspect-ratio:4/3;overflow:hidden">
                     <img src="{{ $doctor->photo_url }}"
-                         alt="{{ $doctor->name }}"
+                         alt="{{ $doctor->localized_name }}"
                          style="width:100%;height:100%;object-fit:cover;display:block"
                          loading="lazy">
                 </div>
 
                 <div style="padding:var(--sp-5) var(--sp-6) var(--sp-6)">
-                    <h2 style="font-size:1.15rem;font-weight:700;color:var(--navy);margin:0 0 var(--sp-1)">{{ $doctor->name }}</h2>
+                    <h2 style="font-size:1.15rem;font-weight:700;color:var(--navy);margin:0 0 var(--sp-1)">{{ $doctor->localized_name }}</h2>
 
                     @if($doctor->title)
                     <div style="font-size:.8rem;color:var(--text-light);margin-bottom:var(--sp-2)">{{ $doctor->title }}</div>
                     @endif
 
-                    @if($doctor->specialty)
-                    <div style="font-size:.85rem;font-weight:600;color:var(--gold-dark);margin-bottom:var(--sp-3)">{{ $doctor->specialty }}</div>
+                    @if($doctor->localized_specialty)
+                    <div style="font-size:.85rem;font-weight:600;color:var(--gold-dark);margin-bottom:var(--sp-3)">{{ $doctor->localized_specialty }}</div>
                     @endif
 
                     @if($doctor->bio_excerpt)

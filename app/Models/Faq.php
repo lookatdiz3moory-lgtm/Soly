@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class Faq extends Model
 {
+    use HasLocalizedAttributes;
+
     protected $fillable = [
         'category',
         'question',
@@ -64,5 +67,21 @@ class Faq extends Model
             ->get()
             ->groupBy('category')
             ->toArray();
+    }
+
+    /* ── Accessors ──────────────────────────────────────────── */
+
+    /**
+     * Locale-aware accessors. EN fields are the source of truth;
+     * AR values are used only when locale=ar AND the AR field is non-empty.
+     */
+    public function getLocalizedQuestionAttribute(): ?string
+    {
+        return $this->localized('question');
+    }
+
+    public function getLocalizedAnswerAttribute(): ?string
+    {
+        return $this->localized('answer');
     }
 }

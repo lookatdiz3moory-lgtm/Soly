@@ -72,6 +72,29 @@
                     @error('description')<span class="adm-form-error">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Arabic translations (optional) --}}
+                <div class="adm-bilingual">
+                    <p class="adm-bilingual__label">{{ __('messages.admin.arabic') }} — {{ __('messages.admin.optional_ar') }}</p>
+
+                    <div class="adm-bilingual__ar adm-form-group" style="grid-column:1/-1">
+                        <label class="adm-form-label" for="short_description_ar">الوصف القصير (Short Description AR)</label>
+                        <input type="text" id="short_description_ar" name="short_description_ar"
+                               class="adm-form-control @error('short_description_ar') adm-form-control--error @enderror"
+                               value="{{ old('short_description_ar') }}" maxlength="300"
+                               placeholder="ملخص من سطر واحد يظهر على البطاقات">
+                        @error('short_description_ar')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="adm-bilingual__ar adm-form-group" style="grid-column:1/-1">
+                        <label class="adm-form-label" for="description_ar">الوصف الكامل (Full Description AR)</label>
+                        <textarea id="description_ar" name="description_ar" rows="6"
+                                  class="adm-form-control @error('description_ar') adm-form-control--error @enderror"
+                                  maxlength="8000"
+                                  placeholder="وصف تفصيلي يظهر في صفحة الخدمة…">{{ old('description_ar') }}</textarea>
+                        @error('description_ar')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
                 <div class="adm-form-group">
                     <label class="adm-form-label" for="image">Cover Image</label>
                     <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp"

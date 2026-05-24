@@ -44,12 +44,12 @@
                         onclick="toggleFaq(this)"
                         aria-expanded="false"
                         style="width:100%;text-align:left;background:none;border:none;padding:var(--sp-5) var(--sp-6);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);cursor:pointer;font-family:inherit">
-                    <span style="font-size:.975rem;font-weight:600;color:var(--navy);line-height:1.5">{{ $faq->question }}</span>
+                    <span style="font-size:.975rem;font-weight:600;color:var(--navy);line-height:1.5">{{ $faq->localized_question }}</span>
                     <span class="faq-icon" style="flex-shrink:0;font-size:1.2rem;color:var(--gold-dark);transition:transform .25s;margin-top:2px" aria-hidden="true">+</span>
                 </button>
                 <div class="faq-answer" style="display:none;padding:0 var(--sp-6) var(--sp-5)">
                     <div style="font-size:.9rem;line-height:1.75;color:var(--text-mid)">
-                        {!! nl2br(e($faq->answer)) !!}
+                        {!! nl2br(e($faq->localized_answer)) !!}
                     </div>
                 </div>
             </div>

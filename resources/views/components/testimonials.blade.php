@@ -41,10 +41,10 @@
 
         @foreach($list as $t)
         @php
-          $name    = is_array($t) ? $t['name']            : $t->name;
+          $name    = is_array($t) ? $t['name']            : $t->localized_name;
           $rating  = (int)(is_array($t) ? $t['rating']    : $t->rating);
           $service = is_array($t) ? ($t['service'] ?? '')  : ($t->service ?? '');
-          $review  = is_array($t) ? $t['review']          : $t->review;
+          $review  = is_array($t) ? $t['review']          : $t->localized_review;
           $avatar  = is_array($t) ? ($t['avatar'] ?? null) : $t->avatar;
           $date    = is_array($t) ? ($t['date'] ?? '')     : ($t->created_at?->diffForHumans() ?? '');
           $source  = is_array($t) ? ($t['source'] ?? 'google') : ($t->source ?? 'google');

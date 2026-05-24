@@ -1,5 +1,9 @@
+@php
+    $__locale = app()->getLocale();
+    $__dir    = in_array($__locale, config('app.rtl_locales', []), true) ? 'rtl' : 'ltr';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', $__locale) }}" dir="{{ $__dir }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -62,7 +66,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {{-- Vite Assets --}}
-    @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/css/rtl.css', 'resources/js/app.js'])
+
+    @if($__dir === 'rtl')
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
 
     {{-- Page-specific head content --}}
     @stack('head')

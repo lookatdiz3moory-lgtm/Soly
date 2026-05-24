@@ -158,7 +158,7 @@
         @foreach($faqs as $faq)
         <div class="faq__item" itemscope itemtype="https://schema.org/Question">
           <button class="faq__question" aria-expanded="false" itemprop="name">
-            {{ is_array($faq) ? $faq['question'] : $faq->question }}
+            {{ is_array($faq) ? $faq['question'] : $faq->localized_question }}
             <svg class="faq__icon" width="18" height="18" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
               <polyline points="6 9 12 15 18 9"/>
@@ -166,7 +166,7 @@
           </button>
           <div class="faq__answer" itemscope itemtype="https://schema.org/Answer">
             <div class="faq__answer-inner" itemprop="text">
-              {{ is_array($faq) ? $faq['answer'] : $faq->answer }}
+              {{ is_array($faq) ? $faq['answer'] : $faq->localized_answer }}
             </div>
           </div>
         </div>

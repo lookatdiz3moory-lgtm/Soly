@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', $doctor->name . ' — Soly Clinic')
-@section('meta_description', ($doctor->specialty ? $doctor->specialty . ' specialist. ' : '') . ($doctor->bio_excerpt ?: 'Meet ' . $doctor->name . ' at Soly Clinic in Zahraa Maadi, Cairo.'))
+@section('title', $doctor->localized_name . ' — Soly Clinic')
+@section('meta_description', ($doctor->localized_specialty ? $doctor->localized_specialty . ' specialist. ' : '') . ($doctor->bio_excerpt ?: 'Meet ' . $doctor->localized_name . ' at Soly Clinic in Zahraa Maadi, Cairo.'))
 
 @section('content')
 
-<div class="page-hero" aria-label="{{ $doctor->name }}">
+<div class="page-hero" aria-label="{{ $doctor->localized_name }}">
     <div class="container" style="position:relative;z-index:1">
-        @if($doctor->specialty)
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ $doctor->specialty }}</div>
+        @if($doctor->localized_specialty)
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ $doctor->localized_specialty }}</div>
         @endif
-        <h1 class="page-hero__title">{{ $doctor->name }}</h1>
+        <h1 class="page-hero__title">{{ $doctor->localized_name }}</h1>
         @if($doctor->title)
         <p class="page-hero__sub">{{ $doctor->title }}</p>
         @endif
@@ -24,10 +24,10 @@
             {{-- Main --}}
             <div>
 
-                @if($doctor->bio)
+                @if($doctor->localized_bio)
                 <h2 style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:var(--sp-5)">About</h2>
                 <div style="font-size:1rem;line-height:1.8;color:var(--text-mid);margin-bottom:var(--sp-10)">
-                    {!! nl2br(e($doctor->bio)) !!}
+                    {!! nl2br(e($doctor->localized_bio)) !!}
                 </div>
                 @endif
 
@@ -65,7 +65,7 @@
                         @foreach($doctor->services as $service)
                         <a href="{{ route('services.show', $service->slug) }}"
                            style="padding:var(--sp-3) var(--sp-4);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:.9rem;font-weight:600;color:var(--navy);transition:border-color .2s,color .2s">
-                            {{ $service->name }}
+                            {{ $service->localized_name }}
                         </a>
                         @endforeach
                     </div>
@@ -80,7 +80,7 @@
                 {{-- Photo --}}
                 <div style="border-radius:12px;overflow:hidden;margin-bottom:var(--sp-6);background:rgba(201,168,76,.08);aspect-ratio:3/4">
                     <img src="{{ $doctor->photo_url }}"
-                         alt="{{ $doctor->name }}"
+                         alt="{{ $doctor->localized_name }}"
                          style="width:100%;height:100%;object-fit:cover;display:block">
                 </div>
 
@@ -102,7 +102,7 @@
 
                 <a href="{{ route('booking.index') }}?doctor={{ $doctor->id }}"
                    class="btn btn--primary" style="width:100%;text-align:center;display:block;margin-bottom:var(--sp-3)">
-                    Book with {{ Str::before($doctor->name, ' ') }}
+                    Book with {{ Str::before($doctor->localized_name, ' ') }}
                 </a>
                 <a href="{{ route('doctors.index') }}"
                    class="btn btn--outline" style="width:100%;text-align:center;display:block">

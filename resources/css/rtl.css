@@ -1,0 +1,335 @@
+/* ──────────────────────────────────────────────────────────────────
+   RTL OVERRIDES — Soly Clinic
+   Loaded for every page; rules only activate when an ancestor has
+   dir="rtl". Keeps the LTR design untouched in English.
+   ────────────────────────────────────────────────────────────────── */
+
+/* ── Arabic font stack ────────────────────────────────────────── */
+[dir="rtl"] body,
+[dir="rtl"] .admin-body {
+    font-family: 'Cairo', 'Tajawal', 'Noto Sans Arabic', 'Outfit', 'Segoe UI', sans-serif;
+    line-height: 1.7;
+    text-align: right;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4,
+[dir="rtl"] .section-title,
+[dir="rtl"] .page-hero__title {
+    font-family: 'Playfair Display', 'Cairo', 'Tajawal', serif;
+    line-height: 1.45;
+}
+
+/* ── Navbar ──────────────────────────────────────────────────── */
+[dir="rtl"] .navbar__strip-inner,
+[dir="rtl"] .navbar__main-inner {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar__strip-left,
+[dir="rtl"] .navbar__strip-right,
+[dir="rtl"] .navbar__nav,
+[dir="rtl"] .navbar__actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar__logo {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar__logo-text {
+    text-align: right;
+}
+
+[dir="rtl"] .navbar__dropdown-menu {
+    right: 0;
+    left: auto;
+    text-align: right;
+}
+
+[dir="rtl"] .navbar__dropdown-item {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+[dir="rtl"] .navbar__mobile-link {
+    text-align: right;
+}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+[dir="rtl"] .hero,
+[dir="rtl"] .hero__content,
+[dir="rtl"] .hero__title,
+[dir="rtl"] .hero__sub,
+[dir="rtl"] .hero__actions,
+[dir="rtl"] .page-hero,
+[dir="rtl"] .page-hero__title,
+[dir="rtl"] .page-hero__sub {
+    text-align: right;
+}
+
+[dir="rtl"] .hero__actions,
+[dir="rtl"] .hero__badges {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* ── Section headers ─────────────────────────────────────────── */
+[dir="rtl"] .section-header,
+[dir="rtl"] .section-title,
+[dir="rtl"] .section-subtitle,
+[dir="rtl"] .section-tag {
+    text-align: center; /* keep section headers centered in both directions */
+}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+[dir="rtl"] .service-card,
+[dir="rtl"] .doctor-card,
+[dir="rtl"] .testimonial-card,
+[dir="rtl"] .offer-card {
+    text-align: right;
+}
+
+[dir="rtl"] .service-card__icon,
+[dir="rtl"] .doctor-card__photo {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+[dir="rtl"] .testimonial-card__footer,
+[dir="rtl"] .testimonial-card__author,
+[dir="rtl"] .testimonial-card__meta {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .testimonial-card__quote {
+    left: auto;
+    right: 24px;
+    transform: scaleX(-1);
+}
+
+/* ── Forms ───────────────────────────────────────────────────── */
+[dir="rtl"] .form-group,
+[dir="rtl"] .form-label,
+[dir="rtl"] .form-control,
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+    text-align: right;
+}
+
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="url"] {
+    direction: ltr;          /* phone numbers & emails stay LTR */
+    text-align: right;
+}
+
+[dir="rtl"] .form-row,
+[dir="rtl"] .form-actions {
+    flex-direction: row-reverse;
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
+[dir="rtl"] .footer__grid,
+[dir="rtl"] .footer__brand,
+[dir="rtl"] .footer__col,
+[dir="rtl"] .footer__contact-item,
+[dir="rtl"] .footer__hours-grid,
+[dir="rtl"] .footer__bottom-inner,
+[dir="rtl"] .footer__legal {
+    text-align: right;
+}
+
+[dir="rtl"] .footer__contact-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .footer__social {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+[dir="rtl"] .footer__logo {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .footer__legal {
+    flex-direction: row-reverse;
+}
+
+/* ── Floating widgets ────────────────────────────────────────── */
+[dir="rtl"] .whatsapp-float {
+    right: auto;
+    left: 24px;
+}
+
+[dir="rtl"] .scroll-top {
+    right: auto;
+    left: 24px;
+}
+
+/* ── Buttons with icons ──────────────────────────────────────── */
+[dir="rtl"] .btn svg + *,
+[dir="rtl"] .btn > svg:first-child {
+    margin-left: 0;
+    margin-right: 6px;
+}
+
+/* Flip carets & directional arrows */
+[dir="rtl"] .navbar__dropdown-trigger svg,
+[dir="rtl"] .arrow-right,
+[dir="rtl"] .navbar__dropdown-item--all {
+    transform: none;
+}
+
+/* ── Language switcher ───────────────────────────────────────── */
+.lang-switcher {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.lang-switcher__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    color: rgba(255,255,255,.55);
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.18);
+    text-decoration: none;
+    transition: background .15s, color .15s, border-color .15s;
+    cursor: pointer;
+}
+
+.lang-switcher__btn:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,.35);
+}
+
+.lang-switcher__btn--active {
+    background: #C9A84C;
+    color: #0D1B2A;
+    border-color: #C9A84C;
+}
+
+.lang-switcher--mobile {
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.lang-switcher--mobile .lang-switcher__btn {
+    height: 32px;
+    min-width: 44px;
+    font-size: 13px;
+}
+
+/* Admin top-bar variant (light background) */
+.adm-topbar .lang-switcher__btn {
+    color: var(--adm-text-muted, #6b7280);
+    border-color: var(--adm-card-border, #e5e7eb);
+}
+
+.adm-topbar .lang-switcher__btn:hover {
+    color: var(--adm-navy, #0D1B2A);
+    border-color: var(--adm-navy, #0D1B2A);
+}
+
+.adm-topbar .lang-switcher__btn--active {
+    background: var(--adm-navy, #0D1B2A);
+    color: #fff;
+    border-color: var(--adm-navy, #0D1B2A);
+}
+
+/* ── Admin panel RTL polish ──────────────────────────────────── */
+[dir="rtl"] .adm-body {
+    text-align: right;
+}
+
+[dir="rtl"] .adm-sidebar {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--adm-card-border, #e5e7eb);
+}
+
+[dir="rtl"] .adm-main {
+    margin-left: 0;
+    margin-right: var(--adm-sidebar-w, 248px);
+}
+
+[dir="rtl"] .adm-nav-item {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+[dir="rtl"] .adm-nav-item svg {
+    margin-left: 10px;
+    margin-right: 0;
+}
+
+[dir="rtl"] .adm-topbar__left,
+[dir="rtl"] .adm-topbar__right,
+[dir="rtl"] .adm-form-grid,
+[dir="rtl"] .adm-form-group,
+[dir="rtl"] .adm-page-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .adm-form-control,
+[dir="rtl"] .adm-form-label,
+[dir="rtl"] .adm-card__body,
+[dir="rtl"] .adm-card__title {
+    text-align: right;
+}
+
+[dir="rtl"] .adm-breadcrumb {
+    flex-direction: row-reverse;
+}
+
+/* Bilingual admin field group: clean visual separation EN vs AR */
+.adm-bilingual {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+    margin-bottom: 18px;
+    border: 1px dashed var(--adm-card-border, #e5e7eb);
+    border-radius: 10px;
+    background: rgba(201,168,76,.04);
+}
+
+.adm-bilingual__label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--adm-gold, #C9A84C);
+    margin: 0;
+}
+
+@media (min-width: 720px) {
+    .adm-bilingual {
+        grid-template-columns: 1fr 1fr;
+    }
+    .adm-bilingual__label {
+        grid-column: 1 / -1;
+    }
+}
+
+.adm-bilingual__ar input,
+.adm-bilingual__ar textarea {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Cairo', 'Tajawal', 'Noto Sans Arabic', 'Outfit', sans-serif;
+}

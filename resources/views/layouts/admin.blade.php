@@ -1,5 +1,9 @@
+@php
+    $__locale = app()->getLocale();
+    $__dir    = in_array($__locale, config('app.rtl_locales', []), true) ? 'rtl' : 'ltr';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', $__locale) }}" dir="{{ $__dir }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +20,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     {{-- Admin assets only — no public CSS --}}
-    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
+    @vite(['resources/css/admin.css', 'resources/css/rtl.css', 'resources/js/admin.js'])
+
+    @if($__dir === 'rtl')
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @endif
 
     @stack('styles')
 </head>
@@ -52,6 +60,9 @@
         </div>
 
         <div class="adm-topbar__right">
+
+            {{-- Language switcher --}}
+            <x-language-switcher />
 
             {{-- Visit site --}}
             <a href="{{ route('home') }}" target="_blank" rel="noopener"

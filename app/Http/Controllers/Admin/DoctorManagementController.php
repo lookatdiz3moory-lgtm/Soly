@@ -115,9 +115,12 @@ class DoctorManagementController extends Controller
     {
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:120'],
+            'name_ar'        => ['nullable', 'string', 'max:120'],
             'title'          => ['nullable', 'string', 'max:80'],
             'specialty'      => ['nullable', 'string', 'max:120'],
+            'specialty_ar'   => ['nullable', 'string', 'max:120'],
             'bio'            => ['nullable', 'string', 'max:5000'],
+            'bio_ar'         => ['nullable', 'string', 'max:5000'],
             'phone'          => ['nullable', 'string', 'max:25'],
             'email'          => ['nullable', 'email', 'max:150'],
             'experience'     => ['nullable', 'string', 'max:80'],

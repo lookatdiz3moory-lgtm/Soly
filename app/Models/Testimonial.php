@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +31,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class Testimonial extends Model
 {
+    use HasLocalizedAttributes;
+
     public const SOURCE_INTERNAL  = 'internal';
     public const SOURCE_GOOGLE    = 'google';
     public const SOURCE_FACEBOOK  = 'facebook';
@@ -39,10 +42,12 @@ class Testimonial extends Model
         'user_id',
         'appointment_id',
         'name',
+        'name_ar',
         'avatar',
         'rating',
         'title',
         'review',
+        'review_ar',
         'service',
         'source',
         'google_review_url',
@@ -113,6 +118,20 @@ class Testimonial extends Model
     /* ── Accessors ──────────────────────────────────────────── */
 
     /**
+     * Locale-aware accessors. EN fields are the source of truth;
+     * AR values are used only when locale=ar AND the AR field is non-empty.
+     */
+    public function getLocalizedNameAttribute(): ?string
+    {
+        return $this->localized('name');
+    }
+
+    public function getLocalizedReviewAttribute(): ?string
+    {
+        return $this->localized('review');
+    }
+
+    /**
      * Full public URL for the avatar image.
      */
     public function getAvatarUrlAttribute(): ?string
@@ -137,14 +156,14 @@ class Testimonial extends Model
      */
     public function getInitialAttribute(): string
     {
-        return mb_strtoupper(mb_substr($this->name, 0, 1));
+        return mb_strtoupper(mb_substr($this->localized_name ?? '', 0, 1));
     }
 
     /**
-     * Truncated review for card previews.
+     * Truncated review for card previews. Locale-aware.
      */
     public function getExcerptAttribute(): string
     {
-        return \Str::limit($this->review, 180);
+        return \Str::limit((string) $this->localized_review, 180);
     }
 }

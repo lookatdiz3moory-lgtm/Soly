@@ -48,7 +48,7 @@
                         {{ $item->initial }}
                     </div>
                     <div>
-                        <div style="font-size:.9rem;font-weight:700;color:var(--navy)">{{ $item->name }}</div>
+                        <div style="font-size:.9rem;font-weight:700;color:var(--navy)">{{ $item->localized_name }}</div>
                         @if($item->service)
                         <div style="font-size:.75rem;color:var(--text-light)">{{ $item->service }}</div>
                         @endif
@@ -76,7 +76,7 @@
                         {{ $item->initial }}
                     </div>
                     <div>
-                        <div style="font-size:.875rem;font-weight:700;color:var(--navy)">{{ $item->name }}</div>
+                        <div style="font-size:.875rem;font-weight:700;color:var(--navy)">{{ $item->localized_name }}</div>
                         @if($item->service)
                         <div style="font-size:.75rem;color:var(--text-light)">{{ $item->service }}</div>
                         @endif

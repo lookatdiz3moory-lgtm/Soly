@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,11 +43,16 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class Doctor extends Model
 {
+    use HasLocalizedAttributes;
+
     protected $fillable = [
         'name',
+        'name_ar',
         'title',
         'specialty',
+        'specialty_ar',
         'bio',
+        'bio_ar',
         'photo',
         'phone',
         'email',
@@ -117,6 +123,25 @@ class Doctor extends Model
     }
 
     /* ── Accessors ──────────────────────────────────────────── */
+
+    /**
+     * Locale-aware accessors. EN fields are the source of truth;
+     * AR values are used only when locale=ar AND the AR field is non-empty.
+     */
+    public function getLocalizedNameAttribute(): ?string
+    {
+        return $this->localized('name');
+    }
+
+    public function getLocalizedSpecialtyAttribute(): ?string
+    {
+        return $this->localized('specialty');
+    }
+
+    public function getLocalizedBioAttribute(): ?string
+    {
+        return $this->localized('bio');
+    }
 
     public function getPhotoUrlAttribute(): string
     {

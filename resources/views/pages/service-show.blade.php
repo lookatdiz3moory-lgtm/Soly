@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', ($service->meta_title ?? $service->name) . ' — Soly Clinic')
-@section('meta_description', $service->meta_description ?? $service->short_description ?? 'Learn about ' . $service->name . ' at Soly Clinic in Zahraa Maadi, Cairo.')
+@section('title', ($service->meta_title ?? $service->localized_name) . ' — Soly Clinic')
+@section('meta_description', $service->meta_description ?? $service->localized_short_description ?? 'Learn about ' . $service->localized_name . ' at Soly Clinic in Zahraa Maadi, Cairo.')
 
 @section('content')
 
-<div class="page-hero" aria-label="{{ $service->name }}">
+<div class="page-hero" aria-label="{{ $service->localized_name }}">
     <div class="container" style="position:relative;z-index:1">
         @if($service->category)
         <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ $service->category }}</div>
         @endif
-        <h1 class="page-hero__title">{{ $service->name }}</h1>
-        @if($service->short_description)
-        <p class="page-hero__sub">{{ $service->short_description }}</p>
+        <h1 class="page-hero__title">{{ $service->localized_name }}</h1>
+        @if($service->localized_short_description)
+        <p class="page-hero__sub">{{ $service->localized_short_description }}</p>
         @endif
     </div>
 </div>
@@ -23,9 +23,9 @@
 
             {{-- Main content --}}
             <div>
-                @if($service->description)
+                @if($service->localized_description)
                 <div style="font-size:1.05rem;line-height:1.8;color:var(--text-mid);margin-bottom:var(--sp-10)">
-                    {!! nl2br(e($service->description)) !!}
+                    {!! nl2br(e($service->localized_description)) !!}
                 </div>
                 @endif
 
@@ -55,10 +55,10 @@
                         <a href="{{ route('doctors.show', $doctor->id) }}"
                            style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:inherit;transition:border-color .2s">
                             <div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold-dark);flex-shrink:0">
-                                {{ mb_strtoupper(mb_substr($doctor->name, 0, 1)) }}
+                                {{ mb_strtoupper(mb_substr($doctor->localized_name, 0, 1)) }}
                             </div>
                             <div>
-                                <div style="font-size:.9rem;font-weight:600;color:var(--navy)">{{ $doctor->name }}</div>
+                                <div style="font-size:.9rem;font-weight:600;color:var(--navy)">{{ $doctor->localized_name }}</div>
                                 @if($doctor->title)
                                 <div style="font-size:.8rem;color:var(--text-light)">{{ $doctor->title }}</div>
                                 @endif
@@ -76,7 +76,7 @@
 
                     @if($service->image)
                     <div style="aspect-ratio:16/9;overflow:hidden">
-                        <img src="{{ $service->image_url }}" alt="{{ $service->name }}"
+                        <img src="{{ $service->image_url }}" alt="{{ $service->localized_name }}"
                              style="width:100%;height:100%;object-fit:cover;display:block"
                              loading="lazy">
                     </div>

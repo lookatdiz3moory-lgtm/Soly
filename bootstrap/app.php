@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
+        // Resolve the visitor's locale from the session on every web request,
+        // after the session has been started by the default web group.
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         // Redirect already-authenticated admin users away from /admin/login
         $middleware->redirectGuestsTo(fn (Request $request) =>
             $request->is('admin/*')

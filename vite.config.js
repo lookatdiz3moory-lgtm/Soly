@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/css/admin.css',
                 'resources/css/components.css',
                 'resources/css/booking.css',
+                'resources/css/rtl.css',
 
                 'resources/js/app.js',
                 'resources/js/admin.js',

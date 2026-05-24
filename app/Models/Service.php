@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,6 +37,8 @@ use Illuminate\Support\Str;
  */
 class Service extends Model
 {
+    use HasLocalizedAttributes;
+
     protected $fillable = [
         'name',
         'name_ar',
@@ -43,7 +46,9 @@ class Service extends Model
         'icon',
         'category',
         'short_description',
+        'short_description_ar',
         'description',
+        'description_ar',
         'benefits',
         'image',
         'price_from',
@@ -157,6 +162,25 @@ class Service extends Model
     }
 
     /* ── Accessors ──────────────────────────────────────────── */
+
+    /**
+     * Locale-aware accessors. EN fields are the source of truth;
+     * AR values are used only when locale=ar AND the AR field is non-empty.
+     */
+    public function getLocalizedNameAttribute(): ?string
+    {
+        return $this->localized('name');
+    }
+
+    public function getLocalizedShortDescriptionAttribute(): ?string
+    {
+        return $this->localized('short_description');
+    }
+
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        return $this->localized('description');
+    }
 
     /**
      * Full public URL for the service image.

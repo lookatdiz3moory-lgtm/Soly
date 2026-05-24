@@ -42,7 +42,7 @@
             @foreach($group as $service)
             <a href="{{ route('services.show', $service->slug) }}"
                class="service-card {{ $service->is_featured ? 'service-card--featured' : '' }}"
-               aria-label="{{ $service->name }}">
+               aria-label="{{ $service->localized_name }}">
 
                 @if($service->is_featured)
                 <div class="service-card__featured-badge">Featured</div>
@@ -55,9 +55,9 @@
                 </div>
 
                 <div class="service-card__body">
-                    <h3 class="service-card__name">{{ $service->name }}</h3>
-                    @if($service->short_description)
-                    <p class="service-card__desc">{{ $service->short_description }}</p>
+                    <h3 class="service-card__name">{{ $service->localized_name }}</h3>
+                    @if($service->localized_short_description)
+                    <p class="service-card__desc">{{ $service->localized_short_description }}</p>
                     @endif
                 </div>
 

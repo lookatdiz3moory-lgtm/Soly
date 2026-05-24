@@ -28,6 +28,17 @@ use App\Http\Controllers\Api\BookingApiController;
    PUBLIC ROUTES
    ═══════════════════════════════════════════════════════════════ */
 
+// ── Locale switcher ─────────────────────────────────────────
+// Stores the selected locale in the session and redirects back.
+// Validated against config('app.supported_locales') so unknown codes
+// silently fall through without changing state.
+Route::get('/lang/{locale}', function (string $locale) {
+    if (in_array($locale, config('app.supported_locales', ['en']), true)) {
+        session(['locale' => $locale]);
+    }
+    return back();
+})->where('locale', '[a-z]{2}')->name('locale.switch');
+
 // ── Home ─────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
