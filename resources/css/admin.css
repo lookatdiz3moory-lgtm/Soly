@@ -93,14 +93,13 @@
   border-bottom: 1px solid var(--adm-sidebar-border);
   flex-shrink: 0;
 }
-.adm-sidebar__logo-icon {
-  width: 36px; height: 36px;
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
+.adm-sidebar__logo-img {
+  display: block;
+  height: 40px;
+  width: auto;
   flex-shrink: 0;
-  line-height: 1;
+  object-fit: contain;
 }
-.adm-sidebar__logo-icon svg { flex-shrink: 0; }
 .adm-sidebar__logo-name {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: .9375rem;

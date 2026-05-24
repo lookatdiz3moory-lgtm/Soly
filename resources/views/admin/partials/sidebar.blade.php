@@ -21,13 +21,11 @@
 
     {{-- Logo --}}
     <div class="adm-sidebar__logo">
-        <div class="adm-sidebar__logo-icon" aria-hidden="true">
-            <svg width="32" height="32" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="34" height="34" rx="10" fill="#C9A84C" fill-opacity="0.15"/>
-                <path d="M11 10h12M9 14c0 0 1.2 2.4 2.5 3.5S14.5 19 17 19s3.8-.8 5-2 2.5-3.5 2.5-3.5" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M13.5 19v5a1.5 1.5 0 003 0v-3a1.5 1.5 0 013 0v3a1.5 1.5 0 003 0v-5" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
+        <img src="{{ asset('images/logo.png') }}"
+             alt="Soly Clinic"
+             class="adm-sidebar__logo-img"
+             width="60" height="40"
+             loading="eager">
         <div>
             <span class="adm-sidebar__logo-name">Soly Clinic</span>
             <span class="adm-sidebar__logo-tag">Admin Panel</span>

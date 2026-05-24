@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <title>Admin Sign In — Soly Clinic</title>
@@ -49,14 +48,12 @@
             text-align: center;
             margin-bottom: 36px;
         }
-        .login-logo-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px; height: 56px;
-            background: rgba(201,168,76,.12);
-            border-radius: 14px;
-            margin-bottom: 14px;
+        .login-logo-img {
+            display: block;
+            height: 64px;
+            width: auto;
+            margin: 0 auto 14px;
+            object-fit: contain;
         }
         .login-logo-name {
             display: block;
@@ -191,12 +188,11 @@
 
         {{-- Logo --}}
         <div class="login-logo">
-            <div class="login-logo-icon" aria-hidden="true">
-                <svg width="30" height="30" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M11 10h12M9 14c0 0 1.2 2.4 2.5 3.5S14.5 19 17 19s3.8-.8 5-2 2.5-3.5 2.5-3.5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M13.5 19v5a1.5 1.5 0 003 0v-3a1.5 1.5 0 013 0v3a1.5 1.5 0 003 0v-5" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
+            <img src="{{ asset('images/logo.png') }}"
+                 alt="Soly Clinic"
+                 class="login-logo-img"
+                 width="72" height="48"
+                 loading="eager">
             <span class="login-logo-name">Soly Clinic</span>
             <span class="login-logo-tag">Staff Portal</span>
         </div>
