@@ -1,7 +1,8 @@
 /**
- * Soly Clinic — booking.js  (Phase 4)
+ * Soly Clinic — booking.js
  * Multi-step booking form with live slot availability.
  * Loaded only on the booking page via @stack('scripts').
+ * Reads window.bookingI18n for localized strings (injected by Blade).
  */
 
 'use strict';
@@ -13,59 +14,54 @@ const on  = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts);
 const val = el => el ? el.value.trim() : '';
 const getCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
+/* ── i18n — falls back to English if bookingI18n is not injected ─ */
+const i18n = window.bookingI18n ?? {};
+const t = key => i18n[key] ?? key;
+
 /* ── State ────────────────────────────────────────────────────── */
 const state = {
-  step:      1,          // current visible panel (1–4)
+  step:      1,
   serviceId: null,
   doctorId:  null,
   date:      null,
   slotStart: null,
   slotEnd:   null,
-  /* Displayed labels for the sidebar summary */
   labels: {
-    service:  '',
-    doctor:   '',
-    date:     '',
-    slot:     '',
-    price:    '',
+    service: '',
+    doctor:  '',
+    date:    '',
+    slot:    '',
+    price:   '',
   },
 };
 
 /* ─────────────────────────────────────────────────────────────────
-   INIT — called once DOM is ready
+   INIT
    ───────────────────────────────────────────────────────────────── */
 function initBookingForm() {
   const form = qs('#bookingForm');
   if (!form) return;
 
-  /* Wire step navigation */
   qsa('[data-next]', form).forEach(btn => on(btn, 'click', () => goNext(form)));
   qsa('[data-back]', form).forEach(btn => on(btn, 'click', () => goBack(form)));
 
-  /* Service selector */
   const serviceSelect = qs('#service_id', form);
   on(serviceSelect, 'change', () => onServiceChange(form, serviceSelect));
 
-  /* Date picker */
   const dateInput = qs('#appointment_date', form);
   setupDatePicker(dateInput);
   on(dateInput, 'change', () => onDateChange(form, dateInput));
 
-  /* Form submit */
   on(form, 'submit', e => { e.preventDefault(); submitBooking(form); });
 
-  /* Notes character counter */
   initCharCounter(qs('#notes', form));
 
-  /* Restore pre-selected values injected by PHP (data attributes on form) */
   const preServiceId = form.dataset.preServiceId;
   const preDoctorId  = form.dataset.preDoctorId;
 
   if (preServiceId && serviceSelect) {
     serviceSelect.value = preServiceId;
     serviceSelect.dispatchEvent(new Event('change'));
-
-    // After doctors load, pre-select doctor
     if (preDoctorId) {
       form.dataset.pendingDoctorId = preDoctorId;
     }
@@ -91,18 +87,15 @@ function setStep(form, step) {
   step = Math.max(1, Math.min(step, totalSteps));
   state.step = step;
 
-  /* Show/hide panels */
   qsa('.booking-panel', form).forEach((panel, i) => {
     panel.classList.toggle('is-active', i + 1 === step);
   });
 
-  /* Update progress circles — .booking-step elements are siblings of form, not descendants */
   qsa('.booking-step', form.closest('.booking-card') ?? document).forEach((el, i) => {
     el.classList.toggle('is-active', i + 1 === step);
     el.classList.toggle('is-done',   i + 1 <  step);
   });
 
-  /* Scroll form top into view on mobile */
   form.closest('.booking-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -111,7 +104,6 @@ function setStep(form, step) {
    ───────────────────────────────────────────────────────────────── */
 function validateCurrentStep(form) {
   clearErrors(form);
-
   switch (state.step) {
     case 1: return validateStep1(form);
     case 2: return validateStep2(form);
@@ -123,12 +115,12 @@ function validateCurrentStep(form) {
 function validateStep1(form) {
   const serviceId = val(qs('#service_id', form));
   if (!serviceId) {
-    showError(qs('#service_id', form), 'Please select a service.');
+    showError(qs('#service_id', form), t('errorService'));
     return false;
   }
   const doctorPicked = qs('input[name="doctor_id"]:checked', form);
   if (!doctorPicked) {
-    showGroupError(qs('#doctorGrid', form), 'Please select a doctor.');
+    showGroupError(qs('#doctorGrid', form), t('errorDoctor'));
     return false;
   }
   return true;
@@ -137,11 +129,11 @@ function validateStep1(form) {
 function validateStep2(form) {
   const date = val(qs('#appointment_date', form));
   if (!date) {
-    showError(qs('#appointment_date', form), 'Please select a date.');
+    showError(qs('#appointment_date', form), t('errorDate'));
     return false;
   }
   if (!state.slotStart) {
-    showGroupError(qs('#slotsGrid', form), 'Please select a time slot.');
+    showGroupError(qs('#slotsGrid', form), t('errorSlot'));
     return false;
   }
   return true;
@@ -154,27 +146,27 @@ function validateStep3(form) {
   const phoneEl = qs('#patient_phone', form);
 
   if (!val(nameEl) || val(nameEl).length < 2) {
-    showError(nameEl, 'Please enter your full name.');
+    showError(nameEl, t('errorName'));
     ok = false;
   }
 
   const phone = val(phoneEl).replace(/[\s\-\(\)]/g, '');
   if (!phone) {
-    showError(phoneEl, 'A mobile number is required.');
+    showError(phoneEl, t('errorPhone'));
     ok = false;
   } else if (!/^(\+2)?01[0125]\d{8}$/.test(phone)) {
-    showError(phoneEl, 'Please enter a valid Egyptian mobile number (01x xxxx xxxx).');
+    showError(phoneEl, t('errorPhoneFmt'));
     ok = false;
   }
 
   const emailEl = qs('#patient_email', form);
   if (val(emailEl) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val(emailEl))) {
-    showError(emailEl, 'Please enter a valid email address.');
+    showError(emailEl, t('errorEmail'));
     ok = false;
   }
 
   if (!qs('#agree_terms', form)?.checked) {
-    showGroupError(qs('.booking-terms', form), 'You must agree to the terms to continue.');
+    showGroupError(qs('.booking-terms', form), t('errorTerms'));
     ok = false;
   }
 
@@ -187,13 +179,11 @@ function validateStep3(form) {
 async function onServiceChange(form, serviceSelect) {
   const id = serviceSelect.value;
 
-  /* Reset downstream state */
   state.serviceId = id || null;
   state.doctorId  = null;
   state.slotStart = null;
   state.slotEnd   = null;
 
-  /* Update summary label */
   const opt = serviceSelect.options[serviceSelect.selectedIndex];
   state.labels.service = id ? opt.text.replace(/\s+—.*/, '') : '';
   state.labels.doctor  = '';
@@ -212,7 +202,7 @@ async function onServiceChange(form, serviceSelect) {
     return;
   }
 
-  doctorGrid.innerHTML = loadingHtml('Loading doctors…');
+  doctorGrid.innerHTML = loadingHtml('…');
   doctorWrap.style.display = 'block';
 
   try {
@@ -220,13 +210,13 @@ async function onServiceChange(form, serviceSelect) {
     const data = await res.json();
 
     if (!data.success || !data.data?.doctors?.length) {
-      doctorGrid.innerHTML = emptyHtml('No doctors available for this service.');
+      doctorGrid.innerHTML = emptyHtml(data.message || '');
       return;
     }
 
     renderDoctors(form, doctorGrid, data.data.doctors);
   } catch {
-    doctorGrid.innerHTML = errorHtml('Could not load doctors. Please refresh.');
+    doctorGrid.innerHTML = errorHtml(t('errorNetwork'));
   }
 }
 
@@ -239,7 +229,7 @@ function renderDoctors(form, container, doctors) {
       <div class="doctor-option__inner">
         <div class="doctor-option__avatar">
           ${d.photo_url
-            ? `<img src="${escHtml(d.photo_url)}" alt="${escHtml(d.name)}" loading="lazy">`
+            ? `<img src="${escHtml(d.photo_url || '')}" alt="${escHtml(d.name)}" loading="lazy">`
             : `<span>${escHtml(d.name.charAt(0))}</span>`
           }
         </div>
@@ -257,7 +247,6 @@ function renderDoctors(form, container, doctors) {
       </div>
     </label>`).join('');
 
-  /* Listen for selection */
   qsa('input[name="doctor_id"]', container).forEach(radio => {
     on(radio, 'change', () => {
       state.doctorId = radio.value;
@@ -266,12 +255,10 @@ function renderDoctors(form, container, doctors) {
       state.slotEnd   = null;
       state.labels.slot = '';
       updateSummary();
-      /* Reset slots if date already chosen */
       if (state.date) loadSlots(form);
     });
   });
 
-  /* Auto-select single doctor or pending pre-selection */
   const pending = form.dataset.pendingDoctorId;
   if (doctors.length === 1) {
     const r = qs('input[name="doctor_id"]', container);
@@ -323,7 +310,6 @@ async function loadSlots(form) {
   grid.innerHTML = `
     <div class="slots-loading" aria-live="polite">
       <div class="slots-loading__spinner" aria-hidden="true"></div>
-      Loading available times…
     </div>`;
 
   try {
@@ -334,14 +320,14 @@ async function loadSlots(form) {
       grid.innerHTML = `
         <div class="slots-empty">
           <div class="slots-empty__icon" aria-hidden="true">📅</div>
-          <p>No available slots on this date.<br>Please try another day.</p>
+          <p>${escHtml(data.message || '')}</p>
         </div>`;
       return;
     }
 
     renderSlots(form, grid, data.data.slots);
   } catch {
-    grid.innerHTML = errorHtml('Could not load time slots. Please try again.');
+    grid.innerHTML = errorHtml(t('errorNetwork'));
   }
 }
 
@@ -352,7 +338,7 @@ function renderSlots(form, container, slots) {
               class="time-slot"
               data-start="${escHtml(s.start)}"
               data-end="${escHtml(s.end)}"
-              aria-label="${fmtTime(s.start)} to ${fmtTime(s.end)}">
+              aria-label="${fmtTime(s.start)} – ${fmtTime(s.end)}">
         ${fmtTime(s.start)}
       </button>`).join('')
   }</div>`;
@@ -365,7 +351,6 @@ function renderSlots(form, container, slots) {
       state.slotEnd   = btn.dataset.end;
       state.labels.slot = `${fmtTime(btn.dataset.start)} – ${fmtTime(btn.dataset.end)}`;
 
-      /* Write to hidden inputs */
       setHidden(form, 'slot_start', state.slotStart);
       setHidden(form, 'slot_end',   state.slotEnd);
       updateSummary();
@@ -382,18 +367,20 @@ function fmtTime(t) {
    SIDEBAR SUMMARY
    ───────────────────────────────────────────────────────────────── */
 function updateSummary() {
-  const set = (id, val) => {
+  const set = (id, v) => {
     const el = qs(id);
     if (!el) return;
-    el.textContent = val || '—';
-    el.classList.toggle('booking-summary__empty', !val);
+    el.textContent = v || '—';
+    el.classList.toggle('booking-summary__empty', !v);
   };
 
-  set('#summary-service',  state.labels.service);
-  set('#summary-doctor',   state.labels.doctor);
-  set('#summary-date',     state.labels.date);
-  set('#summary-slot',     state.labels.slot);
-  set('#summary-price',    state.labels.price ? `From ${state.labels.price}` : '');
+  const priceLabel = state.labels.price ? `${t('priceFrom')} ${state.labels.price}` : '';
+
+  set('#summary-service', state.labels.service);
+  set('#summary-doctor',  state.labels.doctor);
+  set('#summary-date',    state.labels.date);
+  set('#summary-slot',    state.labels.slot);
+  set('#summary-price',   priceLabel);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -402,31 +389,30 @@ function updateSummary() {
 async function submitBooking(form) {
   if (!validateCurrentStep(form)) return;
 
-  const submitBtn = qs('[type="submit"]', form);
-  const originalText = submitBtn?.innerHTML || '';
+  const submitBtn  = qs('[type="submit"]', form);
+  const savedHTML  = submitBtn?.innerHTML || '';
+
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
       <svg class="btn-spinner" width="18" height="18" viewBox="0 0 24 24"
            fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-dasharray="32" stroke-dashoffset="32">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"
+                stroke-dasharray="32" stroke-dashoffset="32">
           <animate attributeName="stroke-dashoffset" dur=".7s" values="32;0" fill="freeze"/>
         </circle>
       </svg>
-      Confirming…`;
+      ${escHtml(t('confirming'))}`;
   }
 
-  /* Build payload from form */
   const fd = new FormData(form);
   const payload = {};
   fd.forEach((v, k) => { payload[k] = v; });
-
-  /* Ensure slot values are in payload */
   payload.slot_start = state.slotStart;
   payload.slot_end   = state.slotEnd;
 
   try {
-    const res  = await fetch('/api/booking', {
+    const res = await fetch('/api/booking', {
       method:  'POST',
       headers: {
         'Content-Type':     'application/json',
@@ -437,6 +423,20 @@ async function submitBooking(form) {
       body: JSON.stringify(payload),
     });
 
+    /* Handle non-JSON error responses before trying to parse */
+    if (res.status === 419) {
+      showToast(t('errorSession'), 'error');
+      return;
+    }
+    if (res.status === 429) {
+      showToast(t('errorTooMany'), 'error');
+      return;
+    }
+    if (!res.ok && res.status >= 500) {
+      showToast(t('errorNetwork'), 'error');
+      return;
+    }
+
     const data = await res.json();
 
     if (data.success) {
@@ -444,13 +444,11 @@ async function submitBooking(form) {
       return;
     }
 
-    /* Show server validation errors */
     if (data.errors) {
       Object.entries(data.errors).forEach(([field, messages]) => {
         const el = qs(`[name="${field}"]`, form);
         if (el) showError(el, Array.isArray(messages) ? messages[0] : messages);
       });
-      /* Jump back to the step that has the first error */
       jumpToFirstError(form);
     }
 
@@ -459,11 +457,11 @@ async function submitBooking(form) {
     }
 
   } catch {
-    showToast('A network error occurred. Please try again.', 'error');
+    showToast(t('errorNetwork'), 'error');
   } finally {
     if (submitBtn) {
       submitBtn.disabled  = false;
-      submitBtn.innerHTML = originalText;
+      submitBtn.innerHTML = savedHTML;
     }
   }
 }
@@ -512,16 +510,13 @@ function clearErrors(form) {
 }
 
 function jumpToFirstError(form) {
-  /* Step 1 fields */
   if (qs('#service_id.form-control--error', form) ||
       qs('input[name="doctor_id"].form-control--error', form)) {
     setStep(form, 1); return;
   }
-  /* Step 2 fields */
   if (qs('#appointment_date.form-control--error', form)) {
     setStep(form, 2); return;
   }
-  /* Step 3 fields */
   if (qs('#patient_name.form-control--error,#patient_phone.form-control--error', form)) {
     setStep(form, 3);
   }
@@ -558,7 +553,6 @@ function initCharCounter(textarea) {
 }
 
 function showToast(message, type = 'info') {
-  /* Reuse existing flash structure from app.css */
   let container = qs('.flash-container');
   if (!container) {
     container = document.createElement('div');
@@ -586,7 +580,6 @@ function escHtml(str) {
     .replace(/'/g,'&#039;');
 }
 
-/* Generic fetch — GET requests have no body */
 function apiFetch(url, opts = {}) {
   return fetch(url, {
     headers: {
@@ -599,9 +592,9 @@ function apiFetch(url, opts = {}) {
   });
 }
 
-const loadingHtml = msg  => `<div class="slots-loading"><div class="slots-loading__spinner" aria-hidden="true"></div>${msg}</div>`;
-const emptyHtml   = msg  => `<div class="slots-empty"><div class="slots-empty__icon" aria-hidden="true">🔍</div><p>${msg}</p></div>`;
-const errorHtml   = msg  => `<p class="form-error" style="padding:12px">${msg}</p>`;
+const loadingHtml = msg  => `<div class="slots-loading"><div class="slots-loading__spinner" aria-hidden="true"></div>${escHtml(msg)}</div>`;
+const emptyHtml   = msg  => `<div class="slots-empty"><div class="slots-empty__icon" aria-hidden="true">🔍</div><p>${escHtml(msg)}</p></div>`;
+const errorHtml   = msg  => `<p class="form-error" style="padding:12px">${escHtml(msg)}</p>`;
 
 /* ─────────────────────────────────────────────────────────────────
    BOOT

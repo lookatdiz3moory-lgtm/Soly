@@ -23,7 +23,7 @@ class DoctorController extends Controller
 
     public function show(int $id): View
     {
-        $doctor = Doctor::with('services:id,name,slug')
+        $doctor = Doctor::with('services:id,name,name_ar,slug')
             ->where('is_active', true)
             ->findOrFail($id);
 

@@ -34,7 +34,7 @@ class BookingController extends Controller
         // All bookable services for the form dropdown
         $services = Service::bookable()
             ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'price_from', 'duration_minutes', 'icon']);
+            ->get(['id', 'name', 'name_ar', 'slug', 'price_from', 'duration_minutes', 'icon']);
 
         // Pre-selected service from ?service=slug or ?service=id
         $preService = null;
@@ -81,7 +81,7 @@ class BookingController extends Controller
      */
     public function confirm(string $reference): View
     {
-        $appointment = Appointment::with(['doctor:id,name,title', 'service:id,name'])
+        $appointment = Appointment::with(['doctor:id,name,name_ar,title', 'service:id,name,name_ar'])
             ->where('reference', $reference)
             ->firstOrFail();
 

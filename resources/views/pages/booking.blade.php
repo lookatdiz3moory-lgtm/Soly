@@ -433,6 +433,24 @@
 @endsection
 
 @push('scripts')
+    <script>
+    window.bookingI18n = {
+        errorService:  "{{ addslashes(__('messages.booking_page.error_service')) }}",
+        errorDoctor:   "{{ addslashes(__('messages.booking_page.error_doctor')) }}",
+        errorDate:     "{{ addslashes(__('messages.booking_page.error_date')) }}",
+        errorSlot:     "{{ addslashes(__('messages.booking_page.error_slot')) }}",
+        errorName:     "{{ addslashes(__('messages.booking_page.error_name')) }}",
+        errorPhone:    "{{ addslashes(__('messages.booking_page.error_phone')) }}",
+        errorPhoneFmt: "{{ addslashes(__('messages.booking_page.error_phone_fmt')) }}",
+        errorEmail:    "{{ addslashes(__('messages.booking_page.error_email')) }}",
+        errorTerms:    "{{ addslashes(__('messages.booking_page.error_terms')) }}",
+        errorNetwork:  "{{ addslashes(__('messages.booking_page.error_network')) }}",
+        errorSession:  "{{ addslashes(__('messages.booking_page.error_session')) }}",
+        errorTooMany:  "{{ addslashes(__('messages.booking_page.error_too_many')) }}",
+        confirming:    "{{ addslashes(__('messages.booking_page.confirming')) }}",
+        priceFrom:     "{{ addslashes(__('messages.booking_page.price_from')) }}",
+    };
+    </script>
     @vite('resources/js/booking.js')
     <script>
     (function () {

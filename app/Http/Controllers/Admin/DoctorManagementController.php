@@ -74,6 +74,12 @@ class DoctorManagementController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         Gate::authorize('delete', $doctor);
+
+        if ($doctor->appointments()->exists()) {
+            return redirect()->route('admin.doctors.index')
+                ->with('error', "Cannot delete Dr. {$doctor->name} — they have linked appointments. Reassign or cancel those appointments first.");
+        }
+
         $this->deleteUploadedImage($doctor->photo);
         $doctor->delete();
         return redirect()->route('admin.doctors.index')

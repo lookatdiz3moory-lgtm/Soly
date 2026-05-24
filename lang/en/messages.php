@@ -348,6 +348,21 @@ return [
         'wa_prefer'         => 'Prefer to book by chat?',
         'wa_prefer_sub'     => "Message us on WhatsApp and we'll find you the perfect slot.",
         'wa_book_btn'       => 'Book via WhatsApp',
+        /* JS-injected strings */
+        'confirming'        => 'Confirming…',
+        'price_from'        => 'From',
+        'error_service'     => 'Please select a service.',
+        'error_doctor'      => 'Please select a doctor.',
+        'error_date'        => 'Please select a date.',
+        'error_slot'        => 'Please select a time slot.',
+        'error_name'        => 'Please enter your full name.',
+        'error_phone'       => 'A mobile number is required.',
+        'error_phone_fmt'   => 'Please enter a valid Egyptian mobile number (01x xxxx xxxx).',
+        'error_email'       => 'Please enter a valid email address.',
+        'error_terms'       => 'You must agree to the terms to continue.',
+        'error_network'     => 'A network error occurred. Please try again.',
+        'error_session'     => 'Your session has expired. Please refresh the page and try again.',
+        'error_too_many'    => 'Too many attempts. Please wait a moment and try again.',
     ],
 
     'doctor_detail' => [
