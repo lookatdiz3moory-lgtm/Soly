@@ -32,7 +32,7 @@
                 @if($service->benefits && count($service->benefits))
                 <div style="margin-bottom:var(--sp-10)">
                     <h2 style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:var(--sp-6)">
-                        Benefits
+                        {{ __('messages.service_detail.benefits') }}
                     </h2>
                     <ul style="list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-3)">
                         @foreach($service->benefits as $benefit)
@@ -48,7 +48,7 @@
                 @if($service->doctors->isNotEmpty())
                 <div>
                     <h2 style="font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:var(--sp-6)">
-                        Treating Doctors
+                        {{ __('messages.service_detail.treating_doctors') }}
                     </h2>
                     <div style="display:flex;flex-wrap:wrap;gap:var(--sp-4)">
                         @foreach($service->doctors as $doctor)
@@ -90,13 +90,13 @@
 
                         @if($service->price_from)
                         <div style="margin-bottom:var(--sp-5);padding-bottom:var(--sp-5);border-bottom:1px solid var(--border)">
-                            <div style="font-size:.75rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:var(--sp-2)">Starting From</div>
+                            <div style="font-size:.75rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:var(--sp-2)">{{ __('messages.service_detail.starting_from') }}</div>
                             <div style="display:flex;align-items:baseline;gap:var(--sp-2)">
                                 <span style="font-size:2rem;font-weight:800;color:var(--gold-dark)">{{ number_format((float)$service->price_from) }}</span>
                                 <span style="font-size:.85rem;color:var(--text-light);font-weight:600">EGP</span>
                             </div>
                             @if($service->price_to)
-                            <div style="font-size:.8rem;color:var(--text-light);margin-top:var(--sp-1)">Up to {{ number_format((float)$service->price_to) }} EGP</div>
+                            <div style="font-size:.8rem;color:var(--text-light);margin-top:var(--sp-1)">{{ __('messages.service_detail.up_to') }} {{ number_format((float)$service->price_to) }} EGP</div>
                             @endif
                         </div>
                         @endif
@@ -104,20 +104,20 @@
                         @if($service->duration_minutes)
                         <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);font-size:.9rem;color:var(--text-mid)">
                             <span aria-hidden="true">⏱</span>
-                            <span>Approx. {{ $service->duration_minutes }} minutes</span>
+                            <span>{{ __('messages.service_detail.approx_minutes', ['n' => $service->duration_minutes]) }}</span>
                         </div>
                         @endif
 
                         @if($service->is_bookable)
                         <a href="{{ route('booking.index') }}?service={{ $service->id }}"
                            class="btn btn--primary" style="width:100%;text-align:center;display:block;margin-bottom:var(--sp-3)">
-                            Book This Service
+                            {{ __('messages.service_detail.book_service') }}
                         </a>
                         @endif
 
                         <a href="{{ route('contact.index') }}"
                            class="btn btn--outline" style="width:100%;text-align:center;display:block">
-                            Ask a Question
+                            {{ __('messages.service_detail.ask_question') }}
                         </a>
 
                     </div>
@@ -126,10 +126,9 @@
 
         </div>
 
-        {{-- Back link --}}
         <div style="margin-top:var(--sp-12);padding-top:var(--sp-8);border-top:1px solid var(--border)">
             <a href="{{ route('services.index') }}" style="color:var(--gold-dark);font-weight:600;text-decoration:none;font-size:.9rem">
-                ← All Services
+                {{ __('messages.service_detail.back_services') }}
             </a>
         </div>
 

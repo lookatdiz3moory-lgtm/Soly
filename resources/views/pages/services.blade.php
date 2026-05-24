@@ -5,14 +5,11 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="Our Services">
+<div class="page-hero" aria-label="{{ __('messages.services_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">What We Offer</div>
-        <h1 class="page-hero__title">Our Dental Services</h1>
-        <p class="page-hero__sub">
-            From routine check-ups to complete smile transformations.
-            Every treatment is tailored, every price is transparent.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.services_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.services_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.services_page.page_sub') }}</p>
     </div>
 </div>
 
@@ -22,13 +19,12 @@
         @if($services->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">🦷</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">Services coming soon</h2>
-            <p style="margin-bottom:var(--sp-8)">Our full service catalogue is being prepared. Contact us directly for any enquiries.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Contact Us</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.services_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.services_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
-        {{-- Group by category --}}
         @php $grouped = $services->groupBy('category'); @endphp
 
         @foreach($grouped as $category => $group)
@@ -45,13 +41,11 @@
                aria-label="{{ $service->localized_name }}">
 
                 @if($service->is_featured)
-                <div class="service-card__featured-badge">Featured</div>
+                <div class="service-card__featured-badge">{{ __('messages.services_page.featured_badge') }}</div>
                 @endif
 
                 <div class="service-card__icon-wrap">
-                    <span class="service-card__icon" aria-hidden="true">
-                        {{ $service->icon ?? '🦷' }}
-                    </span>
+                    <span class="service-card__icon" aria-hidden="true">{{ $service->icon ?? '🦷' }}</span>
                 </div>
 
                 <div class="service-card__body">
@@ -63,7 +57,7 @@
 
                 @if($service->price_from)
                 <div class="service-card__price">
-                    <span class="service-card__price-from">From</span>
+                    <span class="service-card__price-from">{{ __('messages.services_page.from_label') }}</span>
                     <span class="service-card__price-amount">{{ number_format((float)$service->price_from) }}</span>
                     <span class="service-card__price-currency">EGP</span>
                 </div>
@@ -71,9 +65,9 @@
 
                 <div class="service-card__actions">
                     @if($service->is_bookable)
-                    <span class="btn btn--primary service-card__book" style="pointer-events:none">Book Now</span>
+                    <span class="btn btn--primary service-card__book" style="pointer-events:none">{{ __('messages.services_page.book_now') }}</span>
                     @else
-                    <span class="btn btn--outline service-card__book" style="pointer-events:none">Learn More</span>
+                    <span class="btn btn--outline service-card__book" style="pointer-events:none">{{ __('messages.services_page.learn_more') }}</span>
                     @endif
                 </div>
 
@@ -86,12 +80,12 @@
 
         <div style="text-align:center;margin-top:var(--sp-12)">
             <p style="color:var(--text-mid);margin-bottom:var(--sp-6)">
-                Not sure which service you need? Our team will guide you through your options with zero pressure.
+                {{ __('messages.services_page.bottom_text') }}
             </p>
-            <a href="{{ route('booking.index') }}" class="btn btn--primary">Book a Consultation</a>
+            <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.services_page.book_consultation') }}</a>
             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}"
                target="_blank" rel="noopener"
-               class="btn btn--outline" style="margin-left:var(--sp-3)">Ask on WhatsApp</a>
+               class="btn btn--outline" style="margin-inline-start:var(--sp-3)">{{ __('messages.services_page.ask_whatsapp') }}</a>
         </div>
 
     </div>

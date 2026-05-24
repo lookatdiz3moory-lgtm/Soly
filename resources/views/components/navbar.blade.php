@@ -81,20 +81,20 @@
                          x-transition:enter-end="dropdown-enter-end">
                         @php
                             $navServices = [
-                                ['route' => 'services.show', 'param' => 'teeth-cleaning',  'icon' => '🦷', 'label' => 'Teeth Cleaning'],
-                                ['route' => 'services.show', 'param' => 'veneers',          'icon' => '✨', 'label' => 'Veneers'],
-                                ['route' => 'services.show', 'param' => 'zircon-crowns',    'icon' => '💎', 'label' => 'Zircon Crowns'],
-                                ['route' => 'services.show', 'param' => 'hollywood-smile',  'icon' => '😁', 'label' => 'Hollywood Smile'],
-                                ['route' => 'services.show', 'param' => 'dental-implants',  'icon' => '🏆', 'label' => 'Dental Implants'],
-                                ['route' => 'services.show', 'param' => 'orthodontics',     'icon' => '📐', 'label' => 'Orthodontics'],
-                                ['route' => 'services.show', 'param' => 'teeth-whitening',  'icon' => '⭐', 'label' => 'Teeth Whitening'],
-                                ['route' => 'services.show', 'param' => 'root-canal',       'icon' => '🔬', 'label' => 'Root Canal'],
+                                ['route' => 'services.show', 'param' => 'teeth-cleaning',  'icon' => '🦷', 'key' => 'teeth_cleaning'],
+                                ['route' => 'services.show', 'param' => 'veneers',          'icon' => '✨', 'key' => 'veneers'],
+                                ['route' => 'services.show', 'param' => 'zircon-crowns',    'icon' => '💎', 'key' => 'zircon_crowns'],
+                                ['route' => 'services.show', 'param' => 'hollywood-smile',  'icon' => '😁', 'key' => 'hollywood_smile'],
+                                ['route' => 'services.show', 'param' => 'dental-implants',  'icon' => '🏆', 'key' => 'dental_implants'],
+                                ['route' => 'services.show', 'param' => 'orthodontics',     'icon' => '📐', 'key' => 'orthodontics'],
+                                ['route' => 'services.show', 'param' => 'teeth-whitening',  'icon' => '⭐', 'key' => 'teeth_whitening'],
+                                ['route' => 'services.show', 'param' => 'root-canal',       'icon' => '🔬', 'key' => 'root_canal'],
                             ];
                         @endphp
                         @foreach($navServices as $srv)
                             <a href="{{ route($srv['route'], $srv['param']) }}" class="navbar__dropdown-item">
                                 <span class="navbar__dropdown-icon" aria-hidden="true">{{ $srv['icon'] }}</span>
-                                {{ $srv['label'] }}
+                                {{ __('messages.nav.' . $srv['key']) }}
                             </a>
                         @endforeach
                         <a href="{{ route('services') }}" class="navbar__dropdown-item navbar__dropdown-item--all">

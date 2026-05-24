@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Cancel Appointment — ' . $appointment->reference . ' — Soly Clinic')
+@section('title', __('messages.booking_cancel.page_title') . ' — ' . $appointment->reference . ' — Soly Clinic')
 
 @push('styles')
     @vite('resources/css/booking.css')
@@ -17,7 +17,7 @@
                 <div class="cancel-card__header">
                     <div class="cancel-card__icon" aria-hidden="true">⚠️</div>
                     <h1 class="cancel-card__title" id="cancel-heading">
-                        Cancel Appointment?
+                        {{ __('messages.booking_cancel.heading') }}
                     </h1>
                 </div>
 
@@ -25,18 +25,18 @@
                 <div class="cancel-card__body">
 
                     <p style="font-size:14px;color:var(--text-mid);margin-bottom:var(--sp-6)">
-                        You are about to cancel the following appointment.
-                        This action cannot be undone.
+                        {{ __('messages.booking_cancel.warning') }}
                     </p>
 
                     {{-- Appointment summary --}}
+                    @php $drPrefix = __('messages.booking_cancel.dr_prefix'); @endphp
                     <div class="cancel-card__details">
                         @foreach([
-                            ['Reference', $appointment->reference],
-                            ['Service',   $appointment->service?->name ?? '—'],
-                            ['Doctor',    optional($appointment->doctor)->name ? 'Dr. ' . $appointment->doctor->name : '—'],
-                            ['Date',      $appointment->appointment_date->format('l, d F Y')],
-                            ['Time',      $appointment->slot_range],
+                            [__('messages.booking_cancel.row_reference'), $appointment->reference],
+                            [__('messages.booking_cancel.row_service'),   $appointment->service?->localized_name ?? $appointment->service?->name ?? '—'],
+                            [__('messages.booking_cancel.row_doctor'),    optional($appointment->doctor)->name ? $drPrefix . ' ' . $appointment->doctor->name : '—'],
+                            [__('messages.booking_cancel.row_date'),      $appointment->appointment_date->format('l, d F Y')],
+                            [__('messages.booking_cancel.row_time'),      $appointment->slot_range],
                         ] as [$label, $value])
                         <div class="cancel-card__detail-row">
                             <span class="cancel-card__detail-label">{{ $label }}</span>
@@ -54,7 +54,7 @@
                         <div class="form-group">
                             <label class="form-label form-label--required"
                                    for="patient_phone">
-                                Confirm your mobile number to cancel
+                                {{ __('messages.booking_cancel.phone_label') }}
                             </label>
                             <input
                                 type="tel"
@@ -64,6 +64,7 @@
                                 placeholder="01x xxxx xxxx"
                                 autocomplete="tel"
                                 inputmode="numeric"
+                                dir="ltr"
                                 required
                                 autofocus
                             >
@@ -71,7 +72,7 @@
                                 <span class="form-error">{{ $message }}</span>
                             @enderror
                             <span class="form-field-note">
-                                Enter the mobile number used when booking to verify your identity.
+                                {{ __('messages.booking_cancel.phone_note') }}
                             </span>
                         </div>
 
@@ -85,20 +86,20 @@
                                     <line x1="15" y1="9" x2="9" y2="15"/>
                                     <line x1="9"  y1="9" x2="15" y2="15"/>
                                 </svg>
-                                Yes, Cancel My Appointment
+                                {{ __('messages.booking_cancel.confirm_btn') }}
                             </button>
 
                             <a href="{{ route('home') }}" class="btn btn--outline">
-                                No, Keep My Appointment
+                                {{ __('messages.booking_cancel.keep_btn') }}
                             </a>
                         </div>
 
                         <p style="margin-top:var(--sp-5);font-size:13px;color:var(--text-light);text-align:center">
-                            Need to reschedule instead?
+                            {{ __('messages.booking_cancel.reschedule_text') }}
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}?text={{ urlencode('Hello! I would like to reschedule appointment ' . $appointment->reference . '.') }}"
                                target="_blank" rel="noopener noreferrer"
                                style="color:var(--whatsapp-dark)">
-                                Message us on WhatsApp
+                                {{ __('messages.booking_cancel.reschedule_wa') }}
                             </a>
                         </p>
                     </form>

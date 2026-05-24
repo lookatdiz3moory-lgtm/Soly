@@ -18,29 +18,28 @@
 <section class="why-us" id="why-us" aria-labelledby="why-heading">
   <div class="container">
     <div class="section-header section-header--light" data-animate="fade-up">
-      <div class="section-tag section-tag--light">Why Soly Clinic</div>
+      <div class="section-tag section-tag--light">{{ __('messages.home.why_tag') }}</div>
       <h2 class="section-title section-title--light" id="why-heading">
-        Dentistry You Can<br>Actually Trust
+        {{ __('messages.home.why_title') }}
       </h2>
       <div class="section-divider" aria-hidden="true"></div>
       <p class="section-subtitle section-subtitle--light" style="margin-top:var(--sp-5)">
-        We only recommend what you truly need. No upselling, no surprises, no hidden
-        fees — just expert care and genuine honesty.
+        {{ __('messages.home.why_sub') }}
       </p>
     </div>
 
     <div class="why-grid">
       @foreach([
-        ['icon'=>'⚖️', 'title'=>'Radically Transparent',  'desc'=>'We tell you exactly what treatment you need and the cost before we start. No pressure, no unnecessary procedures — ever.'],
-        ['icon'=>'💰', 'title'=>'Fair &amp; Affordable',   'desc'=>'Premium care does not mean inflated prices. We believe every patient deserves high-quality treatment without financial anxiety.'],
-        ['icon'=>'🏆', 'title'=>'Expert Clinical Skills',  'desc'=>'Precision-trained with years of experience across all dental specialties. Military discipline, civilian warmth.'],
-        ['icon'=>'😌', 'title'=>'Truly Pain-Free',         'desc'=>'Modern anaesthesia, patient pacing, and genuine empathy. If dentistry has scared you before — we will change that.'],
-        ['icon'=>'👨‍👩‍👧','title'=>'Built for Families',   'desc'=>'From toddlers to grandparents, we treat every age with equal care and patience. Bring the whole family.'],
-        ['icon'=>'📍', 'title'=>'Your Neighbourhood Clinic','desc'=>'Right here in Zahraa Maadi. Your neighbour, your community, your trusted dentist who knows you by name.'],
+        ['icon'=>'⚖️', 'title'=> __('messages.home.why1_title'), 'desc'=> __('messages.home.why1_desc')],
+        ['icon'=>'💰', 'title'=> __('messages.home.why2_title'), 'desc'=> __('messages.home.why2_desc')],
+        ['icon'=>'🏆', 'title'=> __('messages.home.why3_title'), 'desc'=> __('messages.home.why3_desc')],
+        ['icon'=>'😌', 'title'=> __('messages.home.why4_title'), 'desc'=> __('messages.home.why4_desc')],
+        ['icon'=>'👨‍👩‍👧','title'=> __('messages.home.why5_title'), 'desc'=> __('messages.home.why5_desc')],
+        ['icon'=>'📍', 'title'=> __('messages.home.why6_title'), 'desc'=> __('messages.home.why6_desc')],
       ] as $i => $item)
       <div class="why-card" data-animate="fade-up" data-delay="{{ $i * 75 }}">
         <div class="why-card__icon" aria-hidden="true">{{ $item['icon'] }}</div>
-        <h3>{!! $item['title'] !!}</h3>
+        <h3>{{ $item['title'] }}</h3>
         <p>{{ $item['desc'] }}</p>
       </div>
       @endforeach
@@ -52,15 +51,15 @@
 <section class="before-after" id="gallery" aria-labelledby="gallery-heading">
   <div class="container">
     <div class="section-header" data-animate="fade-up">
-      <div class="section-tag">Real Results</div>
+      <div class="section-tag">{{ __('messages.home.gallery_tag') }}</div>
       <h2 class="section-title" id="gallery-heading">
-        Real Patients.<br>Real Transformations.
+        {{ __('messages.home.gallery_title') }}
       </h2>
       <div class="section-divider" aria-hidden="true"></div>
       <p class="section-subtitle" style="margin-top:var(--sp-5)">
-        Every smile shown here belongs to a real patient who trusted us with their care.
+        {{ __('messages.home.gallery_sub') }}
         <small style="display:block;margin-top:4px;font-size:12px;color:var(--text-light)">
-          Published with patient consent.
+          {{ __('messages.home.gallery_consent') }}
         </small>
       </p>
     </div>
@@ -72,40 +71,44 @@
             <div class="ba-image">
               <img data-src="{{ $item->before_image_url ?? asset('images/placeholder-ba.svg') }}"
                    src="{{ asset('images/placeholder-1x1.svg') }}"
-                   alt="Before {{ $item->treatment ?? '' }}" loading="lazy">
-              <div class="ba-label">Before</div>
+                   alt="{{ __('messages.gallery_page.before') }} {{ $item->treatment ?? '' }}" loading="lazy">
+              <div class="ba-label">{{ __('messages.gallery_page.before') }}</div>
             </div>
             <div class="ba-image">
               <img data-src="{{ $item->after_image_url ?? asset('images/placeholder-ba.svg') }}"
                    src="{{ asset('images/placeholder-1x1.svg') }}"
-                   alt="After {{ $item->treatment ?? '' }}" loading="lazy">
-              <div class="ba-label">After</div>
+                   alt="{{ __('messages.gallery_page.after') }} {{ $item->treatment ?? '' }}" loading="lazy">
+              <div class="ba-label">{{ __('messages.gallery_page.after') }}</div>
             </div>
           </div>
           <div class="ba-caption">
-            <div class="ba-treatment">{{ $item->treatment ?? 'Smile Transformation' }}</div>
+            <div class="ba-treatment">{{ $item->treatment ?? __('messages.hero.card_hollywood') }}</div>
             @if(!empty($item->description))
               <p class="ba-note">{{ $item->description }}</p>
             @endif
           </div>
         </div>
       @empty
-        {{-- Placeholder cards until real gallery is seeded --}}
-        @foreach(['Veneers Transformation','Hollywood Smile','Zircon Crowns','Implant Restoration'] as $i => $label)
+        @foreach([
+          __('messages.nav.veneers'),
+          __('messages.nav.hollywood_smile'),
+          __('messages.nav.zircon_crowns'),
+          __('messages.nav.dental_implants'),
+        ] as $i => $label)
           <div class="ba-item" data-animate="fade-up" data-delay="{{ ($i % 2) * 100 }}">
             <div class="ba-images">
               <div class="ba-image" style="background:var(--navy-mid);display:flex;align-items:center;justify-content:center;">
                 <span style="font-size:44px;opacity:.25">🦷</span>
-                <div class="ba-label">Before</div>
+                <div class="ba-label">{{ __('messages.gallery_page.before') }}</div>
               </div>
               <div class="ba-image" style="background:var(--navy-light);display:flex;align-items:center;justify-content:center;">
                 <span style="font-size:44px;opacity:.35">😁</span>
-                <div class="ba-label">After</div>
+                <div class="ba-label">{{ __('messages.gallery_page.after') }}</div>
               </div>
             </div>
             <div class="ba-caption">
               <div class="ba-treatment">{{ $label }}</div>
-              <p class="ba-note">Real patient. Published with consent.</p>
+              <p class="ba-note">{{ __('messages.common.real_consent') }}</p>
             </div>
           </div>
         @endforeach
@@ -114,7 +117,7 @@
 
     <div style="display:flex;justify-content:center;margin-top:var(--sp-12)" data-animate="fade-up">
       <a href="{{ route('gallery') }}" class="btn btn--outline btn--lg">
-        View Full Gallery
+        {{ __('messages.home.gallery_view_all') }}
       </a>
     </div>
   </div>
@@ -138,19 +141,19 @@
          class="faq-layout">
 
       <div data-animate="fade-up" style="position:sticky;top:calc(var(--navbar-total,108px) + var(--sp-8))">
-        <div class="section-tag">FAQ</div>
+        <div class="section-tag">{{ __('messages.home.faq_tag') }}</div>
         <h2 class="section-title" id="faq-heading" style="margin-top:var(--sp-3)">
-          Common Questions
+          {{ __('messages.home.faq_heading') }}
         </h2>
         <div class="section-divider section-divider--left" aria-hidden="true"
              style="margin-top:var(--sp-4);margin-bottom:var(--sp-5)"></div>
-        <p class="section-subtitle" style="text-align:left">
-          Still have questions? We are happy to help.
+        <p class="section-subtitle" style="text-align:start">
+          {{ __('messages.home.faq_still_have') }}
         </p>
         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}"
            target="_blank" rel="noopener noreferrer"
            class="btn btn--wa" style="margin-top:var(--sp-6)">
-          Ask on WhatsApp
+          {{ __('messages.home.faq_ask_wa') }}
         </a>
       </div>
 
@@ -177,7 +180,7 @@
     <div style="display:flex;justify-content:center;margin-top:var(--sp-10)"
          data-animate="fade-up">
       <a href="{{ route('faq') }}" class="btn btn--outline btn--lg">
-        View All FAQs
+        {{ __('messages.home.faq_view_all') }}
       </a>
     </div>
   </div>
@@ -190,9 +193,9 @@
          aria-labelledby="location-heading">
   <div class="container">
     <div class="section-header" data-animate="fade-up">
-      <div class="section-tag">Find Us</div>
+      <div class="section-tag">{{ __('messages.home.location_tag') }}</div>
       <h2 class="section-title" id="location-heading">
-        We're in Zahraa Maadi, Cairo
+        {{ __('messages.home.location_heading') }}
       </h2>
     </div>
 
@@ -202,9 +205,9 @@
 
       <div style="display:flex;flex-direction:column;gap:var(--sp-6)">
         @foreach([
-          ['svg'=>'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>','label'=>'Address',  'value'=>config('clinic.address','Zahraa Maadi, Cairo, Egypt'),'href'=>null],
-          ['svg'=>'<path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-7-7 2 2 0 011.85-2.12h3"/>','label'=>'Phone','value'=>config('clinic.phone','+20 100 582 6642'),'href'=>'tel:'.config('clinic.phone','')],
-          ['svg'=>'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>','label'=>'Hours','value'=>"Sun–Thu: 9 AM – 9 PM\nSat: 10 AM – 6 PM",'href'=>null],
+          ['svg'=>'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>','label'=> __('messages.home.location_address'),'value'=>config('clinic.address','Zahraa Maadi, Cairo, Egypt'),'href'=>null],
+          ['svg'=>'<path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-7-7 2 2 0 011.85-2.12h3"/>','label'=> __('messages.home.location_phone'),'value'=>config('clinic.phone','+20 100 582 6642'),'href'=>'tel:'.config('clinic.phone','')],
+          ['svg'=>'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>','label'=> __('messages.home.location_hours'),'value'=> __('messages.home.location_hours_val'),'href'=>null],
         ] as $det)
         <div style="display:flex;gap:var(--sp-4);align-items:flex-start">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -229,7 +232,7 @@
 
         <a href="{{ config('clinic.google_maps_url','#') }}" target="_blank" rel="noopener noreferrer"
            class="btn btn--primary" style="margin-top:var(--sp-2)">
-          Get Directions
+          {{ __('messages.home.location_directions') }}
         </a>
       </div>
 
@@ -247,11 +250,11 @@
               <circle cx="12" cy="10" r="3"/>
             </svg>
             <p style="font-size:14px;color:var(--text-light)">
-              Google Maps embed will appear once configured in clinic settings.
+              {{ __('messages.home.location_map_placeholder') }}
             </p>
             <a href="{{ config('clinic.google_maps_url','#') }}" target="_blank"
                rel="noopener noreferrer" class="btn btn--outline btn--sm">
-              Open in Google Maps
+              {{ __('messages.home.location_open_maps') }}
             </a>
           </div>
         @endif

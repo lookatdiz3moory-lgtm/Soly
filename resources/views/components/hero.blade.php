@@ -103,10 +103,10 @@
 
         <div class="hero__card-services">
           @foreach([
-            ['✨', 'Hollywood Smile',  'From 8,000 EGP'],
-            ['💎', 'Zircon Crowns',    'From 1,800 EGP'],
-            ['🏆', 'Dental Implants',  'From 6,000 EGP'],
-            ['⭐', 'Teeth Whitening',  'From 500 EGP'],
+            ['✨', __('messages.hero.card_hollywood'), __('messages.hero.card_from') . ' 8,000 EGP'],
+            ['💎', __('messages.hero.card_zircon'),   __('messages.hero.card_from') . ' 1,800 EGP'],
+            ['🏆', __('messages.hero.card_implants'), __('messages.hero.card_from') . ' 6,000 EGP'],
+            ['⭐', __('messages.hero.card_whitening'),__('messages.hero.card_from') . ' 500 EGP'],
           ] as [$icon, $name, $price])
           <div class="hero__card-service">
             <span class="hero__card-service-icon">{{ $icon }}</span>

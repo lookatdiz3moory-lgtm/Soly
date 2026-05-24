@@ -5,13 +5,11 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="Our Team">
+<div class="page-hero" aria-label="{{ __('messages.doctors_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">Our Team</div>
-        <h1 class="page-hero__title">Meet Our Doctors</h1>
-        <p class="page-hero__sub">
-            Skilled, compassionate, and honest. Every doctor at Soly Clinic shares the same commitment — your health first, always.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.doctors_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.doctors_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.doctors_page.page_sub') }}</p>
     </div>
 </div>
 
@@ -21,9 +19,9 @@
         @if($doctors->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">👨‍⚕️</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">Team profiles coming soon</h2>
-            <p style="margin-bottom:var(--sp-8)">Our doctors are getting their profiles ready. Contact us to meet the team.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Contact Us</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.doctors_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.doctors_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
@@ -33,7 +31,6 @@
                style="display:block;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;transition:box-shadow .2s,transform .2s;box-shadow:0 2px 12px rgba(11,21,32,.06)"
                aria-label="{{ $doctor->localized_name }}">
 
-                {{-- Photo / avatar --}}
                 <div style="background:rgba(201,168,76,.08);aspect-ratio:4/3;overflow:hidden">
                     <img src="{{ $doctor->photo_url }}"
                          alt="{{ $doctor->localized_name }}"
@@ -61,7 +58,7 @@
                     @if($doctor->experience)
                     <div style="display:flex;align-items:center;gap:var(--sp-2);font-size:.8rem;color:var(--text-light)">
                         <span aria-hidden="true">🏅</span>
-                        <span>{{ $doctor->experience }} experience</span>
+                        <span>{{ $doctor->experience }} {{ __('messages.doctors_page.experience_label') }}</span>
                     </div>
                     @endif
                 </div>
@@ -74,9 +71,9 @@
 
         <div style="text-align:center;margin-top:var(--sp-12)">
             <p style="color:var(--text-mid);margin-bottom:var(--sp-6)">
-                Ready to book? Choose a doctor and pick a time that works for you.
+                {{ __('messages.doctors_page.bottom_text') }}
             </p>
-            <a href="{{ route('booking.index') }}" class="btn btn--primary">Book an Appointment</a>
+            <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.doctors_page.book_btn') }}</a>
         </div>
 
     </div>

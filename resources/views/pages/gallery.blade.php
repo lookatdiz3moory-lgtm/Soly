@@ -5,25 +5,23 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="Gallery">
+<div class="page-hero" aria-label="{{ __('messages.gallery_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">Real Results</div>
-        <h1 class="page-hero__title">Patient Gallery</h1>
-        <p class="page-hero__sub">
-            Real patients, real transformations. Every image shown here is published with the patient's full consent.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.gallery_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.gallery_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.gallery_page.page_sub') }}</p>
     </div>
 </div>
 
-<section style="padding:var(--sp-16) 0" aria-label="Gallery items">
+<section style="padding:var(--sp-16) 0" aria-label="{{ __('messages.gallery_page.page_heading') }}">
     <div class="container">
 
         @if($items->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">📷</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">Gallery coming soon</h2>
-            <p style="margin-bottom:var(--sp-8)">We are preparing our before/after gallery. Check back soon or contact us directly.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Contact Us</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.gallery_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.gallery_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
@@ -32,28 +30,26 @@
             $general     = $items->whereIn('type', ['general', 'clinic', 'team']);
         @endphp
 
-        {{-- Before / After --}}
         @if($beforeAfter->isNotEmpty())
         <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:var(--sp-8)">
-            Before &amp; After
+            {{ __('messages.gallery_page.before_after_heading') }}
         </h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--sp-8);margin-bottom:var(--sp-12)">
             @foreach($beforeAfter as $item)
             <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 2px 12px rgba(11,21,32,.06)">
 
-                {{-- Split image --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border)">
                     <div style="position:relative;overflow:hidden;aspect-ratio:1/1;background:#f5f0e8">
                         <img src="{{ $item->before_image_url }}"
-                             alt="Before {{ $item->treatment ?? '' }}"
+                             alt="{{ __('messages.gallery_page.before') }} {{ $item->treatment ?? '' }}"
                              style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(11,21,32,.6);color:#fff;font-size:.7rem;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.5px">Before</div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(11,21,32,.6);color:#fff;font-size:.7rem;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.5px">{{ __('messages.gallery_page.before') }}</div>
                     </div>
                     <div style="position:relative;overflow:hidden;aspect-ratio:1/1;background:#f5f0e8">
                         <img src="{{ $item->after_image_url }}"
-                             alt="After {{ $item->treatment ?? '' }}"
+                             alt="{{ __('messages.gallery_page.after') }} {{ $item->treatment ?? '' }}"
                              style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,76,.85);color:#fff;font-size:.7rem;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.5px">After</div>
+                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,76,.85);color:#fff;font-size:.7rem;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.5px">{{ __('messages.gallery_page.after') }}</div>
                     </div>
                 </div>
 
@@ -76,10 +72,9 @@
         </div>
         @endif
 
-        {{-- General images --}}
         @if($general->isNotEmpty())
         <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:var(--sp-8)">
-            Clinic &amp; Team
+            {{ __('messages.gallery_page.clinic_team_heading') }}
         </h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--sp-4)">
             @foreach($general as $item)
@@ -96,9 +91,9 @@
 
         <div style="text-align:center;margin-top:var(--sp-12)">
             <p style="color:var(--text-mid);margin-bottom:var(--sp-6)">
-                Ready for your own transformation? Book a free consultation today.
+                {{ __('messages.gallery_page.bottom_text') }}
             </p>
-            <a href="{{ route('booking.index') }}" class="btn btn--primary">Book a Consultation</a>
+            <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.gallery_page.book_btn') }}</a>
         </div>
 
     </div>

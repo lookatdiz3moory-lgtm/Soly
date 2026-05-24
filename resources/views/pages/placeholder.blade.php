@@ -12,7 +12,7 @@
     </p>
     <p style="margin-top: 2rem;">
         <a href="{{ route('home') }}" class="btn btn--primary">Back to Home</a>
-        <a href="{{ route('booking') }}" class="btn btn--outline" style="margin-left: .5rem;">Book Appointment</a>
+        <a href="{{ route('booking') }}" class="btn btn--outline" style="margin-inline-start:.5rem;">{{ __('messages.buttons.book') }}</a>
     </p>
 </section>
 @endsection

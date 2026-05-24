@@ -58,17 +58,17 @@
                 <h3 class="footer__heading">{{ __('messages.footer.services') }}</h3>
                 <ul class="footer__links">
                     @foreach([
-                        ['teeth-cleaning', 'Teeth Cleaning'],
-                        ['veneers', 'Veneers'],
-                        ['zircon-crowns', 'Zircon Crowns'],
-                        ['hollywood-smile', 'Hollywood Smile'],
-                        ['dental-implants', 'Dental Implants'],
-                        ['orthodontics', 'Orthodontics'],
-                        ['teeth-whitening', 'Teeth Whitening'],
-                        ['root-canal', 'Root Canal'],
-                    ] as [$slug, $label])
+                        ['teeth-cleaning',  'teeth_cleaning'],
+                        ['veneers',         'veneers'],
+                        ['zircon-crowns',   'zircon_crowns'],
+                        ['hollywood-smile', 'hollywood_smile'],
+                        ['dental-implants', 'dental_implants'],
+                        ['orthodontics',    'orthodontics'],
+                        ['teeth-whitening', 'teeth_whitening'],
+                        ['root-canal',      'root_canal'],
+                    ] as [$slug, $key])
                     <li>
-                        <a href="{{ route('services.show', $slug) }}" class="footer__link">{{ $label }}</a>
+                        <a href="{{ route('services.show', $slug) }}" class="footer__link">{{ __('messages.nav.' . $key) }}</a>
                     </li>
                     @endforeach
                 </ul>

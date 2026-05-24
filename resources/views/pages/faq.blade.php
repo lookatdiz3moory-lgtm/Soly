@@ -5,25 +5,23 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="FAQ">
+<div class="page-hero" aria-label="{{ __('messages.faq_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">Got Questions?</div>
-        <h1 class="page-hero__title">Frequently Asked Questions</h1>
-        <p class="page-hero__sub">
-            Honest answers to the questions we hear most. If yours isn't here, ask us directly — we always reply.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.faq_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.faq_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.faq_page.page_sub') }}</p>
     </div>
 </div>
 
-<section style="padding:var(--sp-16) 0" aria-label="FAQ">
+<section style="padding:var(--sp-16) 0" aria-label="{{ __('messages.faq_page.page_heading') }}">
     <div class="container" style="max-width:760px">
 
         @if($faqs->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">❓</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">FAQ coming soon</h2>
-            <p style="margin-bottom:var(--sp-8)">Our FAQ section is being prepared. Contact us directly with any questions.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Contact Us</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.faq_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.faq_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
@@ -43,7 +41,7 @@
                 <button type="button"
                         onclick="toggleFaq(this)"
                         aria-expanded="false"
-                        style="width:100%;text-align:left;background:none;border:none;padding:var(--sp-5) var(--sp-6);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);cursor:pointer;font-family:inherit">
+                        style="width:100%;text-align:start;background:none;border:none;padding:var(--sp-5) var(--sp-6);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);cursor:pointer;font-family:inherit">
                     <span style="font-size:.975rem;font-weight:600;color:var(--navy);line-height:1.5">{{ $faq->localized_question }}</span>
                     <span class="faq-icon" style="flex-shrink:0;font-size:1.2rem;color:var(--gold-dark);transition:transform .25s;margin-top:2px" aria-hidden="true">+</span>
                 </button>
@@ -62,12 +60,12 @@
 
         <div style="text-align:center;margin-top:var(--sp-10);padding:var(--sp-8);border:1px solid var(--border);border-radius:12px;background:rgba(201,168,76,.04)">
             <p style="font-size:.95rem;color:var(--text-mid);margin-bottom:var(--sp-5)">
-                Still have a question? We're happy to help — no pressure, no obligation.
+                {{ __('messages.faq_page.still_have') }}
             </p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary" style="margin-right:var(--sp-3)">Contact Us</a>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary" style="margin-inline-end:var(--sp-3)">{{ __('messages.faq_page.contact_btn') }}</a>
             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}"
                target="_blank" rel="noopener" class="btn btn--outline">
-                Ask on WhatsApp
+                {{ __('messages.faq_page.ask_wa_btn') }}
             </a>
         </div>
 

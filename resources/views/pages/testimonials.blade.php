@@ -5,25 +5,23 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="Testimonials">
+<div class="page-hero" aria-label="{{ __('messages.testimonials_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">Patient Stories</div>
-        <h1 class="page-hero__title">What Our Patients Say</h1>
-        <p class="page-hero__sub">
-            Real reviews from real patients. We never edit or filter feedback — you deserve the full picture.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.testimonials_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.testimonials_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.testimonials_page.page_sub') }}</p>
     </div>
 </div>
 
-<section style="padding:var(--sp-16) 0" aria-label="Patient testimonials">
+<section style="padding:var(--sp-16) 0" aria-label="{{ __('messages.testimonials_page.page_heading') }}">
     <div class="container">
 
         @if($testimonials->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">⭐</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">Reviews coming soon</h2>
-            <p style="margin-bottom:var(--sp-8)">Patient reviews will appear here. Contact us or find us on Google Maps.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Contact Us</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.testimonials_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.testimonials_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.buttons.contact_us') }}</a>
         </div>
         @else
 
@@ -32,12 +30,11 @@
             $rest     = $testimonials->where('is_featured', false);
         @endphp
 
-        {{-- Featured --}}
         @if($featured->isNotEmpty())
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--sp-6);margin-bottom:var(--sp-12)">
             @foreach($featured as $item)
             <blockquote style="border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:var(--sp-7);background:rgba(201,168,76,.04);box-shadow:0 4px 20px rgba(201,168,76,.1);margin:0;position:relative">
-                <div style="position:absolute;top:var(--sp-5);right:var(--sp-5);font-size:.7rem;font-weight:700;padding:3px 8px;background:rgba(201,168,76,.15);color:var(--gold-dark);border-radius:4px;text-transform:uppercase;letter-spacing:.5px">Featured</div>
+                <div style="position:absolute;top:var(--sp-5);inset-inline-end:var(--sp-5);font-size:.7rem;font-weight:700;padding:3px 8px;background:rgba(201,168,76,.15);color:var(--gold-dark);border-radius:4px;text-transform:uppercase;letter-spacing:.5px">{{ __('messages.testimonials_page.featured_badge') }}</div>
                 <div style="color:var(--gold-dark);font-size:1.1rem;letter-spacing:2px;margin-bottom:var(--sp-4)" aria-label="{{ $item->rating }} out of 5 stars">{{ $item->stars_html }}</div>
                 @if($item->title)
                 <div style="font-weight:700;color:var(--navy);margin-bottom:var(--sp-3)">{{ $item->title }}</div>
@@ -59,7 +56,6 @@
         </div>
         @endif
 
-        {{-- All other reviews --}}
         @if($rest->isNotEmpty())
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--sp-5)">
             @foreach($rest as $item)
@@ -67,7 +63,7 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-3)">
                     <div style="color:var(--gold-dark);font-size:1rem;letter-spacing:1.5px" aria-label="{{ $item->rating }} out of 5 stars">{{ $item->stars_html }}</div>
                     @if($item->source !== 'internal')
-                    <span style="font-size:.7rem;color:var(--text-light);text-transform:capitalize">via {{ $item->source }}</span>
+                    <span style="font-size:.7rem;color:var(--text-light);text-transform:capitalize">{{ __('messages.common.via') }} {{ $item->source }}</span>
                     @endif
                 </div>
                 <p style="font-size:.875rem;line-height:1.7;color:var(--text-mid);margin:0 0 var(--sp-4);font-style:italic">"{{ $item->excerpt }}"</p>
@@ -91,12 +87,12 @@
 
         <div style="text-align:center;margin-top:var(--sp-12)">
             <p style="color:var(--text-mid);margin-bottom:var(--sp-6)">
-                Join hundreds of happy patients. Book your appointment today.
+                {{ __('messages.testimonials_page.bottom_text') }}
             </p>
-            <a href="{{ route('booking.index') }}" class="btn btn--primary">Book Now</a>
+            <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.testimonials_page.book_btn') }}</a>
             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', config('clinic.whatsapp','201000000000')) }}"
                target="_blank" rel="noopener"
-               class="btn btn--outline" style="margin-left:var(--sp-3)">Ask on WhatsApp</a>
+               class="btn btn--outline" style="margin-inline-start:var(--sp-3)">{{ __('messages.testimonials_page.ask_wa_btn') }}</a>
         </div>
 
     </div>

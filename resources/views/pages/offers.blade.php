@@ -5,25 +5,23 @@
 
 @section('content')
 
-<div class="page-hero" aria-label="Special Offers">
+<div class="page-hero" aria-label="{{ __('messages.offers_page.page_heading') }}">
     <div class="container" style="position:relative;z-index:1">
-        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">Limited Time</div>
-        <h1 class="page-hero__title">Special Offers</h1>
-        <p class="page-hero__sub">
-            Quality care at exceptional value. Our offers are transparent — no hidden conditions, no surprises.
-        </p>
+        <div class="page-hero__tag section-tag" style="margin-bottom:var(--sp-4)">{{ __('messages.offers_page.page_tag') }}</div>
+        <h1 class="page-hero__title">{{ __('messages.offers_page.page_heading') }}</h1>
+        <p class="page-hero__sub">{{ __('messages.offers_page.page_sub') }}</p>
     </div>
 </div>
 
-<section style="padding:var(--sp-16) 0" aria-label="Current offers">
+<section style="padding:var(--sp-16) 0" aria-label="{{ __('messages.offers_page.page_heading') }}">
     <div class="container">
 
         @if($offers->isEmpty())
         <div style="text-align:center;padding:var(--sp-16) 0;color:var(--text-light)">
             <div style="font-size:56px;margin-bottom:var(--sp-6)" aria-hidden="true">🎁</div>
-            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">No active offers right now</h2>
-            <p style="margin-bottom:var(--sp-8)">Check back soon — we regularly run promotions. Or contact us to ask about pricing.</p>
-            <a href="{{ route('contact.index') }}" class="btn btn--primary">Ask About Pricing</a>
+            <h2 style="color:var(--navy);margin-bottom:var(--sp-4)">{{ __('messages.offers_page.empty_heading') }}</h2>
+            <p style="margin-bottom:var(--sp-8)">{{ __('messages.offers_page.empty_sub') }}</p>
+            <a href="{{ route('contact.index') }}" class="btn btn--primary">{{ __('messages.offers_page.ask_pricing_btn') }}</a>
         </div>
         @else
 
@@ -35,7 +33,7 @@
 
                 @if($offer->is_featured)
                 <div style="background:var(--gold-dark);color:#fff;font-size:.75rem;font-weight:700;text-align:center;padding:var(--sp-2);letter-spacing:.5px;text-transform:uppercase">
-                    ⭐ Featured Offer
+                    {{ __('messages.offers_page.featured_offer') }}
                 </div>
                 @endif
 
@@ -51,7 +49,7 @@
                     <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin:0 0 var(--sp-2)">{{ $offer->title }}</h2>
 
                     @if($offer->service)
-                    <div style="font-size:.8rem;color:var(--text-light);margin-bottom:var(--sp-3)">{{ $offer->service->name }}</div>
+                    <div style="font-size:.8rem;color:var(--text-light);margin-bottom:var(--sp-3)">{{ $offer->service->localized_name ?? $offer->service->name }}</div>
                     @endif
 
                     @if($offer->description)
@@ -77,14 +75,14 @@
                     @if($offer->discount_percent > 0)
                     <div style="background:var(--navy);color:#fff;border-radius:8px;padding:var(--sp-2) var(--sp-3);text-align:center;flex-shrink:0">
                         <div style="font-size:1.1rem;font-weight:800;line-height:1">{{ $offer->discount_percent }}%</div>
-                        <div style="font-size:.6rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;opacity:.8">off</div>
+                        <div style="font-size:.6rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;opacity:.8">{{ __('messages.offers_page.off_label') }}</div>
                     </div>
                     @endif
                 </div>
 
                 @if($offer->expires_at)
                 <div style="background:rgba(11,21,32,.03);padding:var(--sp-3) var(--sp-6);font-size:.75rem;color:var(--text-light);border-top:1px solid var(--border)">
-                    Expires {{ $offer->expires_at->format('d M Y') }}
+                    {{ __('messages.offers_page.expires_prefix') }} {{ $offer->expires_at->format('d M Y') }}
                 </div>
                 @endif
 
@@ -96,10 +94,10 @@
 
         <div style="text-align:center;margin-top:var(--sp-12)">
             <p style="color:var(--text-mid);margin-bottom:var(--sp-6)">
-                Offers are subject to availability. Contact us to confirm before booking.
+                {{ __('messages.offers_page.bottom_text') }}
             </p>
-            <a href="{{ route('booking.index') }}" class="btn btn--primary">Book Now</a>
-            <a href="{{ route('services.index') }}" class="btn btn--outline" style="margin-left:var(--sp-3)">All Services</a>
+            <a href="{{ route('booking.index') }}" class="btn btn--primary">{{ __('messages.offers_page.book_btn') }}</a>
+            <a href="{{ route('services.index') }}" class="btn btn--outline" style="margin-inline-start:var(--sp-3)">{{ __('messages.offers_page.all_services_btn') }}</a>
         </div>
 
     </div>
