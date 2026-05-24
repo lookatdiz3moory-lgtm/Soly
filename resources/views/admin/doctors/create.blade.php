@@ -11,7 +11,7 @@
 
 @section('content')
 
-<form method="POST" action="{{ route('admin.doctors.store') }}" novalidate>
+<form method="POST" action="{{ route('admin.doctors.store') }}" enctype="multipart/form-data" novalidate>
 @csrf
 
 <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
@@ -97,6 +97,16 @@
                     </div>
                 </div>
 
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="photo">Profile Photo</label>
+                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp"
+                           class="adm-form-control @error('photo') adm-form-control--error @enderror">
+                    <span class="adm-form-hint">JPG, PNG or WEBP, up to 2 MB. Square images look best.</span>
+                    @error('photo')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    <img id="photoPreview" src="" alt=""
+                         style="display:none;margin-top:10px;max-width:160px;height:auto;border-radius:8px;border:1px solid var(--adm-card-border)">
+                </div>
+
             </div>
         </div>
 
@@ -169,5 +179,17 @@
 
 </div>
 </form>
+
+@push('scripts')
+<script>
+    document.getElementById('photo')?.addEventListener('change', function (e) {
+        const file = e.target.files?.[0];
+        const preview = document.getElementById('photoPreview');
+        if (!file || !preview) return;
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    });
+</script>
+@endpush
 
 @endsection

@@ -11,7 +11,7 @@
 
 @section('content')
 
-<form method="POST" action="{{ route('admin.services.update', $service->id) }}" novalidate>
+<form method="POST" action="{{ route('admin.services.update', $service->id) }}" enctype="multipart/form-data" novalidate>
 @csrf @method('PUT')
 
 <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start">
@@ -67,6 +67,20 @@
                               class="adm-form-control @error('description') adm-form-control--error @enderror"
                               maxlength="8000">{{ old('description', $service->description) }}</textarea>
                     @error('description')<span class="adm-form-error">{{ $message }}</span>@enderror
+                </div>
+
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="image">Cover Image</label>
+                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:8px">
+                        <img id="imagePreview" src="{{ $service->image_url }}" alt="Current image"
+                             style="width:160px;height:110px;object-fit:cover;border-radius:8px;border:1px solid var(--adm-card-border)">
+                        <div style="flex:1">
+                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp"
+                                   class="adm-form-control @error('image') adm-form-control--error @enderror">
+                            <span class="adm-form-hint">Upload a new image to replace the current cover. Old image is deleted automatically. JPG/PNG/WEBP, ≤ 2 MB.</span>
+                            @error('image')<span class="adm-form-error">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -147,5 +161,16 @@
 
 </div>
 </form>
+
+@push('scripts')
+<script>
+    document.getElementById('image')?.addEventListener('change', function (e) {
+        const file = e.target.files?.[0];
+        const preview = document.getElementById('imagePreview');
+        if (!file || !preview) return;
+        preview.src = URL.createObjectURL(file);
+    });
+</script>
+@endpush
 
 @endsection

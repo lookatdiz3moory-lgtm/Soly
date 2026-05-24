@@ -7,6 +7,7 @@ use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ServiceManagementController extends Controller
@@ -27,7 +28,11 @@ class ServiceManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         Gate::authorize('create', Service::class);
-        $service = Service::create($this->validateService($request));
+        $data = $this->validateService($request);
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('services', 'public');
+        }
+        $service = Service::create($data);
         return redirect()->route('admin.services.index')
             ->with('success', "Service {$service->name} created.");
     }
@@ -43,7 +48,12 @@ class ServiceManagementController extends Controller
     {
         $service = Service::findOrFail($id);
         Gate::authorize('update', $service);
-        $service->update($this->validateService($request));
+        $data = $this->validateService($request);
+        if ($request->hasFile('image')) {
+            $this->deleteUploadedImage($service->image);
+            $data['image'] = $request->file('image')->store('services', 'public');
+        }
+        $service->update($data);
         return redirect()->route('admin.services.index')
             ->with('success', "Service {$service->name} updated.");
     }
@@ -52,6 +62,7 @@ class ServiceManagementController extends Controller
     {
         $service = Service::findOrFail($id);
         Gate::authorize('delete', $service);
+        $this->deleteUploadedImage($service->image);
         $service->delete();
         return redirect()->route('admin.services.index')
             ->with('success', 'Service removed.');
@@ -59,7 +70,7 @@ class ServiceManagementController extends Controller
 
     private function validateService(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name'              => ['required', 'string', 'max:120'],
             'name_ar'           => ['nullable', 'string', 'max:120'],
             'slug'              => ['nullable', 'string', 'max:140'],
@@ -73,7 +84,25 @@ class ServiceManagementController extends Controller
             'is_bookable'       => ['nullable', 'boolean'],
             'is_active'         => ['nullable', 'boolean'],
             'sort_order'        => ['nullable', 'integer', 'min:0'],
+            'image'             => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        // The image file is handled separately in store/update.
+        unset($data['image']);
+
+        return $data;
+    }
+
+    /**
+     * Delete a previously uploaded image from the public disk.
+     * Skips seeded images stored under public/images/ (path prefix "images/").
+     */
+    private function deleteUploadedImage(?string $path): void
+    {
+        if (!$path || str_starts_with($path, 'images/')) {
+            return;
+        }
+        Storage::disk('public')->delete($path);
     }
 
     private function render(string $view, string $title, array $data = [], ?string $records = null): View

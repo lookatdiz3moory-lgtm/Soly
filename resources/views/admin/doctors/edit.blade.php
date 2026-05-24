@@ -12,7 +12,7 @@
 
 @section('content')
 
-<form method="POST" action="{{ route('admin.doctors.update', $doctor->id) }}" novalidate>
+<form method="POST" action="{{ route('admin.doctors.update', $doctor->id) }}" enctype="multipart/form-data" novalidate>
 @csrf @method('PUT')
 
 <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
@@ -97,6 +97,20 @@
                     </div>
                 </div>
 
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="photo">Profile Photo</label>
+                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:8px">
+                        <img id="photoPreview" src="{{ $doctor->photo_url }}" alt="Current photo"
+                             style="width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--adm-card-border)">
+                        <div style="flex:1">
+                            <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp"
+                                   class="adm-form-control @error('photo') adm-form-control--error @enderror">
+                            <span class="adm-form-hint">Upload a new image to replace the current photo. Old image is deleted automatically. JPG/PNG/WEBP, ≤ 2 MB.</span>
+                            @error('photo')<span class="adm-form-error">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -173,5 +187,16 @@
 
 </div>
 </form>
+
+@push('scripts')
+<script>
+    document.getElementById('photo')?.addEventListener('change', function (e) {
+        const file = e.target.files?.[0];
+        const preview = document.getElementById('photoPreview');
+        if (!file || !preview) return;
+        preview.src = URL.createObjectURL(file);
+    });
+</script>
+@endpush
 
 @endsection

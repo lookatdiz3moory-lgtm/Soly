@@ -11,7 +11,7 @@
 
 @section('content')
 
-<form method="POST" action="{{ route('admin.services.store') }}" novalidate>
+<form method="POST" action="{{ route('admin.services.store') }}" enctype="multipart/form-data" novalidate>
 @csrf
 
 <div style="display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start">
@@ -70,6 +70,16 @@
                               maxlength="8000"
                               placeholder="Detailed description shown on the service detail page…">{{ old('description') }}</textarea>
                     @error('description')<span class="adm-form-error">{{ $message }}</span>@enderror
+                </div>
+
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="image">Cover Image</label>
+                    <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp"
+                           class="adm-form-control @error('image') adm-form-control--error @enderror">
+                    <span class="adm-form-hint">JPG, PNG or WEBP, up to 2 MB. Recommended 1200×800.</span>
+                    @error('image')<span class="adm-form-error">{{ $message }}</span>@enderror
+                    <img id="imagePreview" src="" alt=""
+                         style="display:none;margin-top:10px;max-width:240px;height:auto;border-radius:8px;border:1px solid var(--adm-card-border)">
                 </div>
 
             </div>
@@ -146,5 +156,17 @@
 
 </div>
 </form>
+
+@push('scripts')
+<script>
+    document.getElementById('image')?.addEventListener('change', function (e) {
+        const file = e.target.files?.[0];
+        const preview = document.getElementById('imagePreview');
+        if (!file || !preview) return;
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    });
+</script>
+@endpush
 
 @endsection

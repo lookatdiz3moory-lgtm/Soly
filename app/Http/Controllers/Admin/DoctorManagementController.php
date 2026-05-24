@@ -8,6 +8,7 @@ use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class DoctorManagementController extends Controller
@@ -30,7 +31,11 @@ class DoctorManagementController extends Controller
     public function store(Request $request): RedirectResponse
     {
         Gate::authorize('create', Doctor::class);
-        $doctor = Doctor::create($this->validateDoctor($request));
+        $data = $this->validateDoctor($request);
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('doctors', 'public');
+        }
+        $doctor = Doctor::create($data);
         if ($request->filled('services')) {
             $doctor->services()->sync((array) $request->input('services'));
         }
@@ -52,7 +57,12 @@ class DoctorManagementController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         Gate::authorize('update', $doctor);
-        $doctor->update($this->validateDoctor($request));
+        $data = $this->validateDoctor($request);
+        if ($request->hasFile('photo')) {
+            $this->deleteUploadedImage($doctor->photo);
+            $data['photo'] = $request->file('photo')->store('doctors', 'public');
+        }
+        $doctor->update($data);
         if ($request->has('services')) {
             $doctor->services()->sync((array) $request->input('services'));
         }
@@ -64,6 +74,7 @@ class DoctorManagementController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         Gate::authorize('delete', $doctor);
+        $this->deleteUploadedImage($doctor->photo);
         $doctor->delete();
         return redirect()->route('admin.doctors.index')
             ->with('success', 'Doctor removed.');
@@ -117,7 +128,11 @@ class DoctorManagementController extends Controller
             'specialties.*'  => ['string', 'max:100'],
             'languages'      => ['nullable', 'array'],
             'languages.*'    => ['string', 'max:80'],
+            'photo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        // The photo file is handled separately in store/update.
+        unset($data['photo']);
 
         // Convert comma-separated textarea inputs to arrays if submitted as strings
         foreach (['specialties', 'languages'] as $field) {
@@ -127,6 +142,18 @@ class DoctorManagementController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Delete a previously uploaded photo from the public disk.
+     * Skips seeded images stored under public/images/ (path prefix "images/").
+     */
+    private function deleteUploadedImage(?string $path): void
+    {
+        if (!$path || str_starts_with($path, 'images/')) {
+            return;
+        }
+        Storage::disk('public')->delete($path);
     }
 
     private function render(string $view, string $title, array $data = [], ?string $records = null): View
