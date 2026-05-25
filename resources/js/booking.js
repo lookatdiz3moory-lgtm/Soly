@@ -138,6 +138,7 @@ function validateCurrentStep(form) {
     case 1: return validateStep1(form);
     case 2: return validateStep2(form);
     case 3: return validateStep3(form);
+    case 4: return validateStep4(form);
     default: return true;
   }
 }
@@ -197,12 +198,15 @@ function validateStep3(form) {
     ok = false;
   }
 
+  return ok;
+}
+
+function validateStep4(form) {
   if (!qs('#agree_terms', form)?.checked) {
     showGroupError(qs('.booking-terms', form), t('errorTerms'));
-    ok = false;
+    return false;
   }
-
-  return ok;
+  return true;
 }
 
 /* ─────────────────────────────────────────────────────────────────
