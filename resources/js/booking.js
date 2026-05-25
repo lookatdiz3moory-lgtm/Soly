@@ -53,8 +53,8 @@ function initBookingForm() {
   on(document, 'click', e => {
     const nextBtn = e.target.closest('[data-next]');
     const backBtn = e.target.closest('[data-back]');
-    if (nextBtn && form.contains(nextBtn)) { dbg('delegated next click'); goNext(form); }
-    if (backBtn && form.contains(backBtn)) { dbg('delegated back click'); goBack(form); }
+    if (nextBtn && form.contains(nextBtn)) { e.preventDefault(); dbg('delegated next click'); goNext(form); }
+    if (backBtn && form.contains(backBtn)) { e.preventDefault(); dbg('delegated back click'); goBack(form); }
   });
 
   const serviceSelect = qs('#service_id', form);
@@ -291,6 +291,17 @@ function renderDoctors(form, container, doctors) {
       state.labels.slot = '';
       updateSummary();
       if (state.date) loadSlots(form);
+    });
+  });
+
+  qsa('.doctor-option', container).forEach(label => {
+    on(label, 'click', e => {
+      e.preventDefault();
+      const radio = label.querySelector('input[type="radio"]');
+      if (!radio) return;
+      dbg('doctor-option clicked, setting radio checked for value=', radio.value);
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
     });
   });
 
