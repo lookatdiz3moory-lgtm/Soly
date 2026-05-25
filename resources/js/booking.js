@@ -86,7 +86,10 @@ function initBookingForm() {
    STEP NAVIGATION
    ───────────────────────────────────────────────────────────────── */
 function goNext(form) {
-  dbg('goNext clicked, step=', state.step, 'state=', JSON.stringify(state));
+  dbg('goNext: step=', state.step, 'serviceId=', state.serviceId, 'doctorId=', state.doctorId, 'slotStart=', state.slotStart);
+  const allRadios = qsa('input[name="doctor_id"]', form);
+  dbg('goNext: radio count=', allRadios.length);
+  allRadios.forEach(r => dbg('  radio', r.value, 'checked=', r.checked));
   if (!validateCurrentStep(form)) {
     dbg('validation FAILED for step', state.step);
     shakePanel(form);
@@ -141,14 +144,13 @@ function validateCurrentStep(form) {
 
 function validateStep1(form) {
   const serviceId = val(qs('#service_id', form));
-  dbg('validateStep1: serviceId=', serviceId);
+  dbg('validateStep1: serviceId=', serviceId, 'state.doctorId=', state.doctorId);
   if (!serviceId) {
     showError(qs('#service_id', form), t('errorService'));
     return false;
   }
-  const doctorPicked = qs('input[name="doctor_id"]:checked', form);
-  dbg('validateStep1: doctorPicked=', doctorPicked, 'doctorGrid=', qs('#doctorGrid', form));
-  if (!doctorPicked) {
+  dbg('validateStep1: checking state.doctorId=', state.doctorId, 'DOM :checked=', qs('input[name="doctor_id"]:checked', form));
+  if (!state.doctorId) {
     showGroupError(qs('#doctorGrid', form), t('errorDoctor'));
     return false;
   }
@@ -284,11 +286,13 @@ function renderDoctors(form, container, doctors) {
 
   qsa('input[name="doctor_id"]', container).forEach(radio => {
     on(radio, 'change', () => {
+      dbg('radio change fired: value=', radio.value, 'checked=', radio.checked);
       state.doctorId = radio.value;
       state.labels.doctor = radio.dataset.name || '';
       state.slotStart = null;
       state.slotEnd   = null;
       state.labels.slot = '';
+      setHidden(form, 'doctor_id', radio.value);
       updateSummary();
       if (state.date) loadSlots(form);
     });
