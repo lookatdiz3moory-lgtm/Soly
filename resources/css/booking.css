@@ -142,9 +142,11 @@
 
 .booking-panel {
   display: none;
-  animation: fadeSlideUp .25s ease;
 }
-.booking-panel.is-active { display: block; }
+.booking-panel.is-active {
+  display: block;
+  animation: fadeSlideUp .25s ease both;
+}
 
 .booking-panel__title {
   font-family: var(--font-serif);
@@ -397,6 +399,20 @@
 .booking-wa-alt__text { font-size: 13px; color: var(--text-mid); margin-bottom: var(--sp-4); }
 .booking-wa-alt__text strong { display: block; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
 
+/* ── Booking-specific validation error (supplements global .form-error) ── */
+.booking-card .form-error--visible {
+  display: block;
+  padding: 8px 12px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.25);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b91c1c;
+  margin-top: 8px;
+  animation: fadeSlideUp .2s ease both;
+}
+
 /* ────────────────────────────────────────────────────────────────
    8. FORM ROW HELPERS (supplement app.css)
    ──────────────────────────────────────────────────────────────── */
@@ -646,6 +662,17 @@
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-6px); }
+  30%       { transform: translateX(5px); }
+  45%       { transform: translateX(-4px); }
+  60%       { transform: translateX(3px); }
+  75%       { transform: translateX(-2px); }
+}
+.booking-panel.shake {
+  animation: shake .45s ease;
 }
 @keyframes bounceIn {
   0%   { transform: scale(.4); opacity: 0; }

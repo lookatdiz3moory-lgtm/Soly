@@ -19,6 +19,10 @@ const i18n = window.bookingI18n ?? {};
 const t = key => i18n[key] ?? key;
 const isAr = (i18n.locale ?? document.documentElement.lang ?? 'en') === 'ar';
 
+/* ── Debug logger ─────────────────────────────────────────────── */
+const DBG = true; // flip to false to silence
+const dbg = (...a) => DBG && console.log('[Booking]', ...a);
+
 /* ── State ────────────────────────────────────────────────────── */
 const state = {
   step:      1,
@@ -40,11 +44,18 @@ const state = {
    INIT
    ───────────────────────────────────────────────────────────────── */
 function initBookingForm() {
+  dbg('initBookingForm start, readyState=', document.readyState);
   const form = qs('#bookingForm');
-  if (!form) return;
+  dbg('form=', form);
+  if (!form) { dbg('ABORT: #bookingForm not found'); return; }
 
-  qsa('[data-next]', form).forEach(btn => on(btn, 'click', () => goNext(form)));
-  qsa('[data-back]', form).forEach(btn => on(btn, 'click', () => goBack(form)));
+  /* ── Event delegation: catches clicks regardless of DOM timing ── */
+  on(document, 'click', e => {
+    const nextBtn = e.target.closest('[data-next]');
+    const backBtn = e.target.closest('[data-back]');
+    if (nextBtn && form.contains(nextBtn)) { dbg('delegated next click'); goNext(form); }
+    if (backBtn && form.contains(backBtn)) { dbg('delegated back click'); goBack(form); }
+  });
 
   const serviceSelect = qs('#service_id', form);
   on(serviceSelect, 'change', () => onServiceChange(form, serviceSelect));
@@ -75,8 +86,23 @@ function initBookingForm() {
    STEP NAVIGATION
    ───────────────────────────────────────────────────────────────── */
 function goNext(form) {
-  if (!validateCurrentStep(form)) return;
+  dbg('goNext clicked, step=', state.step, 'state=', JSON.stringify(state));
+  if (!validateCurrentStep(form)) {
+    dbg('validation FAILED for step', state.step);
+    shakePanel(form);
+    return;
+  }
+  dbg('validation PASSED, advancing to step', state.step + 1);
   setStep(form, state.step + 1);
+}
+
+function shakePanel(form) {
+  const panel = qs('.booking-panel.is-active', form);
+  if (!panel) return;
+  panel.classList.remove('shake');
+  void panel.offsetWidth; // force reflow
+  panel.classList.add('shake');
+  setTimeout(() => panel.classList.remove('shake'), 500);
 }
 
 function goBack(form) {
@@ -115,11 +141,13 @@ function validateCurrentStep(form) {
 
 function validateStep1(form) {
   const serviceId = val(qs('#service_id', form));
+  dbg('validateStep1: serviceId=', serviceId);
   if (!serviceId) {
     showError(qs('#service_id', form), t('errorService'));
     return false;
   }
   const doctorPicked = qs('input[name="doctor_id"]:checked', form);
+  dbg('validateStep1: doctorPicked=', doctorPicked, 'doctorGrid=', qs('#doctorGrid', form));
   if (!doctorPicked) {
     showGroupError(qs('#doctorGrid', form), t('errorDoctor'));
     return false;
@@ -129,6 +157,7 @@ function validateStep1(form) {
 
 function validateStep2(form) {
   const date = val(qs('#appointment_date', form));
+  dbg('validateStep2: date=', date, 'slotStart=', state.slotStart, 'slotEnd=', state.slotEnd);
   if (!date) {
     showError(qs('#appointment_date', form), t('errorDate'));
     return false;
@@ -179,6 +208,7 @@ function validateStep3(form) {
    ───────────────────────────────────────────────────────────────── */
 async function onServiceChange(form, serviceSelect) {
   const id = serviceSelect.value;
+  dbg('onServiceChange: id=', id);
 
   state.serviceId = id || null;
   state.doctorId  = null;
@@ -483,26 +513,21 @@ function showError(el, message) {
 
   removeOldError(group);
   const span = document.createElement('span');
-  span.className   = 'form-error';
+  span.className   = 'form-error form-error--visible';
   span.textContent = message;
   group.appendChild(span);
-
-  if (!el._scrolled) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el._scrolled = true;
-    setTimeout(() => { el._scrolled = false; }, 800);
-  }
+  span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showGroupError(container, message) {
   if (!container) return;
   removeOldError(container);
   const span = document.createElement('div');
-  span.className   = 'form-error';
+  span.className   = 'form-error form-error--visible';
   span.style.cssText = 'margin-top:8px';
   span.textContent = message;
   container.appendChild(span);
-  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function removeOldError(parent) {
@@ -604,4 +629,9 @@ const errorHtml   = msg  => `<p class="form-error" style="padding:12px">${escHtm
 /* ─────────────────────────────────────────────────────────────────
    BOOT
    ───────────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', initBookingForm);
+dbg('boot: readyState=', document.readyState);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initBookingForm);
+} else {
+  initBookingForm();
+}
